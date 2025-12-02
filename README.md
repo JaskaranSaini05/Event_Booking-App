@@ -1,16 +1,27 @@
-# event_booking_app
+# Event_Booking-App
 
-A new Flutter project.
+A Flutter-based mobile application for browsing and booking events.
 
-## Getting Started
+## 📌 Overview
+This project is an Event Booking App built using **Flutter**.  
+It will include:
 
-This project is a starting point for a Flutter application.
+- Splash Screen  
+- Login & Sign up  
+- Event list  
+- Event details  
+- Booking UI  
+- User profile  
+- Dark/light theme support  
 
-A few resources to get you started if this is your first Flutter project:
+This README will be updated as the project grows.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Getting Started
+
+To run the project:
+
+```sh
+flutter pub get
+flutter run
