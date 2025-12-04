@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:event_booking_app/custom_themes/app_theme.dart';
 import 'package:event_booking_app/screens/home_screen.dart';
+import 'package:event_booking_app/screens/onboarding_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -137,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder:(_) => const HomeScreen()),
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -201,7 +202,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OnboardingScreen(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         'Sign Up',
                         style: TextStyle(
