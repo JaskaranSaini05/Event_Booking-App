@@ -1,54 +1,86 @@
 import 'package:flutter/material.dart';
 import '../../custom_themes/app_theme.dart';
+import 'explore_screen.dart';
+import 'favorite_screen.dart';
+import 'ticket_screen.dart';
+import 'profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int index = 0;
+
+  final pages = [
+    const HomeMainView(),
+    const ExploreScreen(),
+    const FavoriteScreen(),
+    const TicketScreen(),
+    const ProfileScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      bottomNavigationBar: buildBottomNav(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 10),
-              buildSearchBar(),
-              const SizedBox(height: 20),
+      body: pages[index],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: index,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: AppTheme.colorAccent,
+        unselectedItemColor: Colors.grey,
+        elevation: 5,
+        onTap: (i) => setState(() => index = i),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: "Favorite"),
+          BottomNavigationBarItem(icon: Icon(Icons.confirmation_num), label: "Ticket"),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+        ],
+      ),
+    );
+  }
+}
 
-              // Categories
-              buildHeader("Categories"),
-              const SizedBox(height: 12),
-              buildCategories(),
+class HomeMainView extends StatelessWidget {
+  const HomeMainView({super.key});
 
-              const SizedBox(height: 20),
-
-              // Upcoming Events
-              buildHeader("Upcoming Events"),
-              const SizedBox(height: 12),
-              buildUpcomingEventCard(
-                img: "https://images.pexels.com/photos/164712/pexels-photo-164712.jpeg",
-                title: "Acoustic Serenade Showcase",
-                price: 30,
-              ),
-
-              const SizedBox(height: 20),
-
-              // Nearby Events
-              buildHeader("Nearby Events"),
-              const SizedBox(height: 12),
-              buildNearbyEventCard(),
-            ],
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 10),
+            buildSearchBar(),
+            const SizedBox(height: 20),
+            buildHeader("Categories"),
+            const SizedBox(height: 12),
+            buildCategories(),
+            const SizedBox(height: 20),
+            buildHeader("Upcoming Events"),
+            const SizedBox(height: 12),
+            buildUpcomingEventCard(
+              img: "https://images.pexels.com/photos/164712/pexels-photo-164712.jpeg",
+              title: "Acoustic Serenade Showcase",
+              price: 30,
+            ),
+            const SizedBox(height: 20),
+            buildHeader("Nearby Events"),
+            const SizedBox(height: 12),
+            buildNearbyEventCard(),
+          ],
         ),
       ),
     );
   }
-
-  // ---------------- WIDGETS ---------------- //
 
   Widget buildSearchBar() {
     return Row(
@@ -125,8 +157,7 @@ class HomeScreen extends StatelessWidget {
               child: Icon(c[1] as IconData, color: AppTheme.colorAccent),
             ),
             const SizedBox(height: 6),
-            Text(c[0] as String,
-                style: const TextStyle(fontWeight: FontWeight.w500)),
+            Text(c[0] as String, style: const TextStyle(fontWeight: FontWeight.w500)),
           ],
         );
       }).toList(),
@@ -155,7 +186,6 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Image Card
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: Stack(
@@ -165,14 +195,12 @@ class HomeScreen extends StatelessWidget {
                   top: 10,
                   left: 10,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.orange,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text("Music",
-                        style: TextStyle(color: Colors.white)),
+                    child: const Text("Music", style: TextStyle(color: Colors.white)),
                   ),
                 ),
                 Positioned(
@@ -184,26 +212,21 @@ class HomeScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: Colors.white,
                     ),
-                    child: const Icon(Icons.favorite_border,
-                        color: Colors.red),
+                    child: const Icon(Icons.favorite_border, color: Colors.red),
                   ),
                 )
               ],
             ),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             title,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 6),
-
           Row(
             children: const [
-            Icon(Icons.location_on, size: 18, color: Colors.orange),
+              Icon(Icons.location_on, size: 18, color: Colors.orange),
               SizedBox(width: 4),
               Text("New York, USA"),
               SizedBox(width: 10),
@@ -212,29 +235,25 @@ class HomeScreen extends StatelessWidget {
               Text("May 29 - 10:00 PM"),
             ],
           ),
-
           const SizedBox(height: 10),
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "\$$price.00 /Person",
+                "\$30.00 /Person",
                 style: const TextStyle(
                   fontSize: 18,
                   color: Colors.orange,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              // avatars
               Row(
                 children: [
                   for (int i = 0; i < 3; i++)
                     const CircleAvatar(
                       radius: 14,
-                      backgroundImage: NetworkImage(
-                          "https://randomuser.me/api/portraits/men/11.jpg"),
+                      backgroundImage:
+                          NetworkImage("https://randomuser.me/api/portraits/men/11.jpg"),
                     ),
                   Container(
                     padding: const EdgeInsets.all(6),
@@ -284,26 +303,22 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.orange,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text("Dance",
-                      style: TextStyle(color: Colors.white)),
+                  child: const Text("Dance", style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(height: 6),
                 const Text(
                   "Modern Dance Fiesta",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: const [
-                    Icon(Icons.location_on,
-                        size: 18, color: Colors.orange),
+                    Icon(Icons.location_on, size: 18, color: Colors.orange),
                     SizedBox(width: 4),
                     Text("New York, USA")
                   ],
@@ -313,23 +328,6 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
-    );
-  }
-
-  Widget buildBottomNav() {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppTheme.colorAccent,
-      unselectedItemColor: Colors.grey,
-      elevation: 5,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-        BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.favorite), label: "Favorite"),
-        BottomNavigationBarItem(icon: Icon(Icons.confirmation_num), label: "Ticket"),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
-      ],
     );
   }
 }

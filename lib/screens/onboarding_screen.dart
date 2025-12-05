@@ -55,12 +55,19 @@ class OnboardingScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreenTwo(),
+                        ),
+                      );
+                    },
                     child: Container(
                       height: 55,
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Color(0xffFB7A2E),
+                        color: const Color(0xffFB7A2E),
                         borderRadius: BorderRadius.circular(30),
                       ),
                       alignment: Alignment.center,
@@ -104,25 +111,6 @@ class OnboardingScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const OnboardingScreenTwo(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Sign Up',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xffFB7A2E),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 40),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:event_booking_app/screens/login_screen.dart';
+import 'package:event_booking_app/screens/signup_page.dart';
+import 'onboarding_screen_three.dart';
 
 class OnboardingScreenTwo extends StatelessWidget {
   const OnboardingScreenTwo({super.key});
@@ -20,7 +21,7 @@ class OnboardingScreenTwo extends StatelessWidget {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      MaterialPageRoute(builder: (_) => const SignupPage()),
                     );
                   },
                   child: const Text(
@@ -89,7 +90,14 @@ class OnboardingScreenTwo extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const OnboardingScreenThree(),
+                            ),
+                          );
+                        },
                         child: Container(
                           height: 55,
                           width: 55,
