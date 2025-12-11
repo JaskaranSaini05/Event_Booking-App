@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:event_booking_app/screens/signup_page.dart';
+import 'onboarding_screen.dart';
 import 'onboarding_screen_three.dart';
+import 'signup_page.dart';
 
 class OnboardingScreenTwo extends StatelessWidget {
   const OnboardingScreenTwo({super.key});
@@ -11,23 +12,22 @@ class OnboardingScreenTwo extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 12, right: 20),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SignupPage()),
-                    );
-                  },
-                  child: const Text(
+              padding: const EdgeInsets.only(right: 20, top: 10),
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SignupPage()),
+                  );
+                },
+                child: const Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
                     'Skip',
                     style: TextStyle(
-                      color: Color(0xffFB7A2E),
+                      color: Colors.deepOrange,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -35,102 +35,123 @@ class OnboardingScreenTwo extends StatelessWidget {
                 ),
               ),
             ),
-            Center(
-              child: Image.asset(
-                'assets/images/onboarding_screen_2.png',
-                height: 360,
-                fit: BoxFit.contain,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const Text(
-                    'Uncover Exciting Upcoming',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xffFB7A2E),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const Text(
-                    'and Nearby Events',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.black54,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _dot(true),
-                      const SizedBox(width: 8),
-                      _dot(false),
-                      const SizedBox(width: 8),
-                      _dot(false),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const OnboardingScreenThree(),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    Container(
+                      height: 320,
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(horizontal: 28),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'IMAGE HERE',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.grey.shade400,
                             ),
-                          );
-                        },
-                        child: Container(
-                          height: 55,
-                          width: 55,
-                          decoration: const BoxDecoration(
-                            color: Color(0xffFB7A2E),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.arrow_forward_ios,
-                            color: Colors.white,
-                            size: 20,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                    ),
+                    const SizedBox(height: 30),
+                    const Text(
+                      'Navigate Events Using a\nInteractive Map',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    const Text(
+                      'Lorem ipsum dolor sit amet, consectetur\nadipiscing elit, sed do eiusmod tempor incididunt',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 40),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 40),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                              );
+                            },
+                            child: Container(
+                              height: 55,
+                              width: 55,
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.deepOrange, width: 2),
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                height: 10,
+                                width: 10,
+                                decoration: const BoxDecoration(
+                                  color: Colors.deepOrange,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                height: 10,
+                                width: 10,
+                                decoration: BoxDecoration(
+                                  color: Colors.deepOrange.withOpacity(0.3),
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            ],
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const OnboardingScreenThree()),
+                              );
+                            },
+                            child: Container(
+                              height: 55,
+                              width: 55,
+                              decoration: BoxDecoration(
+                                color: Colors.deepOrange,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _dot(bool active) {
-    return Container(
-      width: active ? 12 : 8,
-      height: active ? 12 : 8,
-      decoration: BoxDecoration(
-        color: active ? const Color(0xffFB7A2E) : Colors.grey[300],
-        shape: BoxShape.circle,
       ),
     );
   }

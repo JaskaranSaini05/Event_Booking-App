@@ -5,6 +5,16 @@ class ExploreScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Explore Screen", style: TextStyle(fontSize: 20)));
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Explore"),
+      ),
+      body: const Center(
+        child: Text(
+          "Explore Screen",
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
+    );
   }
 }

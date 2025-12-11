@@ -1,6 +1,6 @@
-import 'package:event_booking_app/custom_themes/app_theme.dart';
-import 'package:event_booking_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
+import '../custom_themes/app_theme.dart';
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
