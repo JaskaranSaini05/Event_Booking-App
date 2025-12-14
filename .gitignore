@@ -61,6 +61,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# 🔥 Firebase (IMPORTANT – DO NOT COMMIT)
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # iOS/XCode related
 **/ios/**/*.mode1v3
 **/ios/**/*.mode2v3

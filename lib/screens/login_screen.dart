@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../custom_themes/app_theme.dart';
+import '../services/auth_service.dart';
 import 'forgot_password_screen.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
@@ -20,6 +21,33 @@ class _LoginScreenState extends State<LoginScreen> {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("All fields are required")),
+      );
+      return;
+    }
+
+    final auth = AuthService();
+
+    final error = await auth.signIn(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+    );
+
+    if (error == null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error)),
+      );
+    }
   }
 
   @override
@@ -106,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ForgotPasswordScreen(),
+                        builder: (_) => const ForgotPasswordScreen(),
                       ),
                     );
                   },
@@ -130,14 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
-                      ),
-                    );
-                  },
+                  onPressed: _handleLogin,
                   child: const Text(
                     "Sign In",
                     style: TextStyle(
@@ -158,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const OnboardingScreen(),
+                          builder: (_) => const OnboardingScreen(),
                         ),
                       );
                     },

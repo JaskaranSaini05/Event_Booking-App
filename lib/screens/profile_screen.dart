@@ -43,23 +43,10 @@ class ProfileScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            Row(
-              children: const [
-                SizedBox(width: 48),
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      "Profile",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 48),
-              ],
+            const SizedBox(height: 10),
+            const Text(
+              "Profile",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 10),
             Stack(
@@ -81,79 +68,111 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 10),
             const Text(
               "Che Guevara",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Expanded(
               child: ListView(
                 children: [
                   menuTile(Icons.person_outline, "Your Profile", () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProfileDetailsScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileDetailsScreen()));
                   }),
                   menuTile(Icons.credit_card, "Payment Methods", () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PaymentMethodScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentMethodScreen()));
                   }),
                   menuTile(Icons.people_outline, "Following", () {}),
                   menuTile(Icons.settings_outlined, "Settings", () {}),
                   menuTile(Icons.help_outline, "Help Center", () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const HelpCenterScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const HelpCenterScreen()));
                   }),
                   menuTile(Icons.privacy_tip_outlined, "Privacy Policy", () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()));
                   }),
                   menuTile(Icons.group_add_outlined, "Invite Friends", () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const InviteFriendsScreen()),
-                    );
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const InviteFriendsScreen()));
                   }),
                   menuTile(Icons.logout, "Log Out", () {
-                    showDialog(
+                    showModalBottomSheet(
                       context: context,
-                      builder: (_) => AlertDialog(
-                        title: const Text("Confirm Logout"),
-                        content: const Text("Are you sure you want to logout?"),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancel"),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                (route) => false,
-                              );
-                            },
-                            child: const Text(
-                              "Logout",
-                              style: TextStyle(color: Colors.deepOrange),
-                            ),
-                          ),
-                        ],
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                       ),
+                      builder: (_) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 4,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade400,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const Text(
+                                "Logout",
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 10),
+                              const Divider(),
+                              const SizedBox(height: 10),
+                              const Text(
+                                "Are you sure you want to log out?",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 20),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.grey.shade200,
+                                        foregroundColor: Colors.deepOrange,
+                                        elevation: 0,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.deepOrange,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(30),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                          (route) => false,
+                                        );
+                                      },
+                                      child: const Text("Yes, Logout"),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   }),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -163,10 +182,7 @@ class ProfileScreen extends StatelessWidget {
   Widget menuTile(IconData icon, String title, VoidCallback onTap) {
     return ListTile(
       leading: Icon(icon, color: Colors.deepOrange),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.black87),
-      ),
+      title: Text(title),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
       onTap: onTap,
     );
