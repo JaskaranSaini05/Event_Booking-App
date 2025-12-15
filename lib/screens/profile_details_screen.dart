@@ -1,12 +1,76 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../custom_themes/app_theme.dart';
 import 'profile_screen.dart';
 
-class ProfileDetailsScreen extends StatelessWidget {
+class ProfileDetailsScreen extends StatefulWidget {
   const ProfileDetailsScreen({super.key});
 
   @override
+  State<ProfileDetailsScreen> createState() => _ProfileDetailsScreenState();
+}
+
+class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
+  final user = FirebaseAuth.instance.currentUser;
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  String gender = "";
+
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfile();
+  }
+
+  Future<void> fetchProfile() async {
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .get();
+
+    if (doc.exists) {
+      final data = doc.data()!;
+      nameController.text = data['name'] ?? '';
+      emailController.text = data['email'] ?? user!.email ?? '';
+      gender = data['gender'] ?? '';
+    }
+
+    setState(() {
+      loading = false;
+    });
+  }
+
+  Future<void> updateProfile() async {
+    if (user == null) return;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user!.uid)
+        .update({
+      'name': nameController.text.trim(),
+      'email': emailController.text.trim(),
+      'gender': gender,
+    });
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const ProfileScreen()),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
@@ -35,8 +99,7 @@ class ProfileDetailsScreen extends StatelessWidget {
                             color: AppTheme.backgroundColor,
                             boxShadow: const [
                               BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4)
+                                  color: Colors.black12, blurRadius: 4)
                             ],
                           ),
                           child: const Icon(Icons.arrow_back),
@@ -46,8 +109,7 @@ class ProfileDetailsScreen extends StatelessWidget {
                       const Text(
                         "Your Profile",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600),
+                            fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                       const Spacer(),
                       const SizedBox(width: 40),
@@ -60,7 +122,8 @@ class ProfileDetailsScreen extends StatelessWidget {
                       CircleAvatar(
                         radius: 55,
                         backgroundImage: NetworkImage(
-                          "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
+                          user!.photoURL ??
+                              "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
                         ),
                       ),
                       Container(
@@ -79,48 +142,69 @@ class ProfileDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 30),
                   inputLabel("Name"),
-                  inputField("Esther Howard"),
-                  const SizedBox(height: 16),
-                  inputLabel("Phone Number"),
-                  Stack(
-                    alignment: Alignment.centerRight,
-                    children: [
-                      inputField("603.555.0123"),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Text(
-                          "Change",
-                          style: TextStyle(
-                              color: Colors.deepOrange,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      )
-                    ],
-                  ),
+                  inputEditableField(nameController),
                   const SizedBox(height: 16),
                   inputLabel("Email"),
-                  inputField("example@gmail.com"),
+                  inputEditableField(emailController),
                   const SizedBox(height: 16),
                   inputLabel("Gender"),
-                  Container(
-                    height: 52,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border:
-                          Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: Row(
-                      children: const [
-                        Text(
-                          "Select",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                        Spacer(),
-                        Icon(Icons.keyboard_arrow_down,
-                            color: Colors.deepOrange),
-                      ],
+                  GestureDetector(
+                    onTap: () async {
+                      final result = await showModalBottomSheet<String>(
+                        context: context,
+                        builder: (_) {
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ListTile(
+                                title: const Text("Male"),
+                                onTap: () =>
+                                    Navigator.pop(context, "Male"),
+                              ),
+                              ListTile(
+                                title: const Text("Female"),
+                                onTap: () =>
+                                    Navigator.pop(context, "Female"),
+                              ),
+                              ListTile(
+                                title: const Text("Other"),
+                                onTap: () =>
+                                    Navigator.pop(context, "Other"),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (result != null) {
+                        setState(() {
+                          gender = result;
+                        });
+                      }
+                    },
+                    child: Container(
+                      height: 52,
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border:
+                            Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Row(
+                        children: [
+                          Text(
+                            gender.isEmpty ? "Select" : gender,
+                            style: TextStyle(
+                                color: gender.isEmpty
+                                    ? Colors.grey
+                                    : Colors.black),
+                          ),
+                          const Spacer(),
+                          const Icon(Icons.keyboard_arrow_down,
+                              color: Colors.deepOrange),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -139,19 +223,22 @@ class ProfileDetailsScreen extends StatelessWidget {
                       offset: Offset(0, -2))
                 ],
               ),
-              child: Container(
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.deepOrange,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: const Center(
-                  child: Text(
-                    "Update",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600),
+              child: GestureDetector(
+                onTap: updateProfile,
+                child: Container(
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: Colors.deepOrange,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      "Update",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
               ),
@@ -169,14 +256,14 @@ class ProfileDetailsScreen extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(
           text,
-          style: const TextStyle(
-              fontSize: 14, fontWeight: FontWeight.w500),
+          style:
+              const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
       ),
     );
   }
 
-  Widget inputField(String hint) {
+  Widget inputEditableField(TextEditingController controller) {
     return Container(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -185,9 +272,9 @@ class ProfileDetailsScreen extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade300),
       ),
       alignment: Alignment.centerLeft,
-      child: Text(
-        hint,
-        style: TextStyle(color: Colors.grey.shade600),
+      child: TextField(
+        controller: controller,
+        decoration: const InputDecoration(border: InputBorder.none),
       ),
     );
   }

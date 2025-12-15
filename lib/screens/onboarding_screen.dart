@@ -26,14 +26,9 @@ class OnboardingScreen extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Center(
-                        child: Text(
-                          'IMAGE HERE',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontSize: 20,
-                          ),
-                        ),
+                      child: Image.asset(
+                        'assets/images/onboarding_community_events.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                     const SizedBox(height: 40),
