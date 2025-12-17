@@ -5,6 +5,7 @@ import 'favorite_screen.dart';
 import 'ticket_screen.dart';
 import 'profile_screen.dart';
 import 'category_screen.dart';
+import 'event_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,12 +22,8 @@ class HomeScreen extends StatelessWidget {
             topLeft: Radius.circular(25),
             topRight: Radius.circular(25),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: const Offset(0, -2),
-            ),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(0, -2)),
           ],
         ),
         child: Row(
@@ -57,19 +54,14 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 15),
               Row(
                 children: [
-                  Text(
-                    "Location",
-                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
-                  ),
+                  Text("Location", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                   const Spacer(),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: AppTheme.backgroundColor,
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(blurRadius: 4, color: Colors.black12),
-                      ],
+                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                     ),
                     child: Icon(Icons.notifications_none, color: AppTheme.textPrimary),
                   )
@@ -96,9 +88,7 @@ class HomeScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppTheme.backgroundColor,
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(color: Colors.black12, blurRadius: 4),
-                        ],
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
                       ),
                       child: TextField(
                         decoration: InputDecoration(
@@ -139,16 +129,40 @@ class HomeScreen extends StatelessWidget {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    eventCard("Acoustic Serenade Showcase"),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EventDetailScreen()),
+                        );
+                      },
+                      child: eventCard("Acoustic Serenade Showcase"),
+                    ),
                     const SizedBox(width: 15),
-                    eventCard("MusicMania Festival"),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => EventDetailScreen()),
+                        );
+                      },
+                      child: eventCard("MusicMania Festival"),
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 25),
               sectionHeader("Nearby Events", context),
               const SizedBox(height: 12),
-              eventSmallCard("Dance Workshop"),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => EventDetailScreen()),
+                  );
+                },
+                child: eventSmallCard("Dance Workshop"),
+              ),
             ],
           ),
         ),
@@ -222,7 +236,7 @@ class HomeScreen extends StatelessWidget {
             children: const [
               Icon(Icons.location_on, size: 16, color: Colors.deepOrange),
               SizedBox(width: 4),
-              Text("New York, USA", style: TextStyle(fontSize: 13, color: Colors.black)),
+              Text("New York, USA", style: TextStyle(fontSize: 13)),
             ],
           ),
           const SizedBox(height: 6),
@@ -250,8 +264,7 @@ class HomeScreen extends StatelessWidget {
             child: const Center(child: Icon(Icons.image, color: Colors.white, size: 30)),
           ),
           const SizedBox(width: 15),
-          Text(title,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+          Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
         ],
       ),
     );
