@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'onboarding_screen_two.dart';
 import 'onboarding_screen_four.dart';
-import 'signup_page.dart';
 
 class OnboardingScreenThree extends StatelessWidget {
   const OnboardingScreenThree({super.key});
@@ -18,13 +17,8 @@ class OnboardingScreenThree extends StatelessWidget {
               child: Align(
                 alignment: Alignment.topRight,
                 child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const SignupPage()),
-                    );
-                  },
-                  child: Text(
+                  onTap: () {},
+                  child: const Text(
                     "Skip",
                     style: TextStyle(
                       color: Colors.deepOrange,
@@ -36,62 +30,67 @@ class OnboardingScreenThree extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Image.asset(
-              "assets/onboard3.png",
-              height: 380,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              "Navigate Events Using a\nInteractive Map",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.deepOrange,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+            Expanded(
+              flex: 4,
+              child: Container(
+                alignment: Alignment.center,
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Icon(
+                  Icons.image,
+                  size: 120,
+                  color: Colors.grey,
+                ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 25),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Text(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.grey,
-                  fontSize: 14,
-                ),
+              child: Column(
+                children: const [
+                  Text(
+                    "Navigate Event Using a",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.deepOrange,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Interactive Map",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text(
+                    "Explore nearby events visually, discover venues easily, and reach your destination with confidence",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 25),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.deepOrange.withOpacity(0.4),
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                indicator(false),
                 const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.deepOrange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                indicator(false),
                 const SizedBox(width: 8),
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.deepOrange.withOpacity(0.4),
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                indicator(true),
               ],
             ),
             const SizedBox(height: 30),
@@ -102,7 +101,7 @@ class OnboardingScreenThree extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const OnboardingScreenTwo()),
                       );
@@ -111,7 +110,10 @@ class OnboardingScreenThree extends StatelessWidget {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        border: Border.all(color: Colors.deepOrange, width: 2),
+                        border: Border.all(
+                          color: Colors.deepOrange,
+                          width: 2,
+                        ),
                       ),
                       child: const Icon(
                         Icons.arrow_back,
@@ -121,7 +123,7 @@ class OnboardingScreenThree extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (_) => const OnboardingScreenFour()),
                       );
@@ -140,9 +142,23 @@ class OnboardingScreenThree extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
+            const SizedBox(height: 20),
           ],
         ),
+      ),
+    );
+  }
+
+  static Widget indicator(bool active) {
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(
+        color: active
+            ? Colors.deepOrange
+            : Colors.deepOrange.withOpacity(0.4),
+        shape: BoxShape.circle,
       ),
     );
   }

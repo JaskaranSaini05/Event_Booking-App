@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'payment_method_screen.dart';
 
 class ReviewTicketSummaryScreen extends StatelessWidget {
@@ -10,6 +12,13 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
     required this.ticketType,
     required this.seats,
   });
+
+  Future<Map<String, dynamic>> _getUserData() async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final doc =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    return doc.data() ?? {};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,122 +41,146 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                  )
-                ],
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
-                      height: 70,
-                      width: 70,
-                      fit: BoxFit.cover,
-                    ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _getUserData(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final user = snapshot.data!;
+          final name = user['name'] ?? '';
+          final phone = user['phone'] ?? '';
+          final email = user['email'] ?? '';
+
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                      )
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Music",
-                          style: TextStyle(fontSize: 12, color: Colors.deepOrange),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.network(
+                          "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
+                          height: 70,
+                          width: 70,
+                          fit: BoxFit.cover,
                         ),
-                        SizedBox(height: 4),
-                        Text(
-                          "Acoustic Serenade Showcase",
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 6),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, size: 14, color: Colors.grey),
-                            SizedBox(width: 4),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
                             Text(
-                              "New York, USA",
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                              "Music",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              "Acoustic Serenade Showcase",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(Icons.location_on,
+                                    size: 14, color: Colors.grey),
+                                SizedBox(width: 4),
+                                Text(
+                                  "New York, USA",
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                infoRow("Full Name", name),
+                infoRow("Phone Number", phone),
+                infoRow("Email", email),
+                const SizedBox(height: 20),
+                priceRow(
+                    "$seats $ticketType Tickets", "\$${ticketPrice * seats}"),
+                priceRow("Fees", "\$25.00"),
+                const Divider(height: 30),
+                priceRow(
+                  "Total",
+                  "\$${total.toStringAsFixed(2)}",
+                  bold: true,
+                  highlight: true,
+                ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text("Paypal",
+                        style: TextStyle(fontSize: 14, color: Colors.grey)),
+                    Text(
+                      "Change",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.deepOrange,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            infoRow("Full Name", "Esther Howard"),
-            infoRow("Phone Number", "+1 (208) 555-0112"),
-            infoRow("Email", "example@gmail.com"),
-            const SizedBox(height: 20),
-            priceRow("$seats $ticketType Tickets", "\$${ticketPrice * seats}"),
-            priceRow("Fees", "\$25.00"),
-            const Divider(height: 30),
-            priceRow(
-              "Total",
-              "\$${total.toStringAsFixed(2)}",
-              bold: true,
-              highlight: true,
-            ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("Paypal", style: TextStyle(fontSize: 14, color: Colors.grey)),
-                Text(
-                  "Change",
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.deepOrange,
-                    fontWeight: FontWeight.w600,
+                  ],
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrange,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PaymentMethodScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Continue",
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
               ],
             ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PaymentMethodScreen(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  "Continue",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

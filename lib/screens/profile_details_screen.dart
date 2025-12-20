@@ -13,9 +13,11 @@ class ProfileDetailsScreen extends StatefulWidget {
 
 class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   final user = FirebaseAuth.instance.currentUser;
-  final nameController = TextEditingController();
-  final emailController = TextEditingController();
-  String gender = "";
+
+  String name = '';
+  String email = '';
+  String phone = '';
+  String gender = '';
 
   bool loading = true;
 
@@ -35,32 +37,15 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
 
     if (doc.exists) {
       final data = doc.data()!;
-      nameController.text = data['name'] ?? '';
-      emailController.text = data['email'] ?? user!.email ?? '';
+      name = data['name'] ?? '';
+      email = data['email'] ?? user!.email ?? '';
+      phone = data['phone'] ?? '';
       gender = data['gender'] ?? '';
     }
 
     setState(() {
       loading = false;
     });
-  }
-
-  Future<void> updateProfile() async {
-    if (user == null) return;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user!.uid)
-        .update({
-      'name': nameController.text.trim(),
-      'email': emailController.text.trim(),
-      'gender': gender,
-    });
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const ProfileScreen()),
-    );
   }
 
   @override
@@ -99,7 +84,9 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                             color: AppTheme.backgroundColor,
                             boxShadow: const [
                               BoxShadow(
-                                  color: Colors.black12, blurRadius: 4)
+                                color: Colors.black12,
+                                blurRadius: 4,
+                              )
                             ],
                           ),
                           child: const Icon(Icons.arrow_back),
@@ -109,140 +96,30 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       const Text(
                         "Your Profile",
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w600),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                       const Spacer(),
                       const SizedBox(width: 40),
                     ],
                   ),
-                  const SizedBox(height: 30),
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 55,
-                        backgroundImage: NetworkImage(
-                          user!.photoURL ??
-                              "https://images.unsplash.com/photo-1500648767791-00dcc994a43e",
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: Colors.deepOrange,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 40),
                   inputLabel("Name"),
-                  inputEditableField(nameController),
+                  inputValue(name),
                   const SizedBox(height: 16),
                   inputLabel("Email"),
-                  inputEditableField(emailController),
+                  inputValue(email),
+                  const SizedBox(height: 16),
+                  inputLabel("Phone Number"),
+                  inputValue(phone),
                   const SizedBox(height: 16),
                   inputLabel("Gender"),
-                  GestureDetector(
-                    onTap: () async {
-                      final result = await showModalBottomSheet<String>(
-                        context: context,
-                        builder: (_) {
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ListTile(
-                                title: const Text("Male"),
-                                onTap: () =>
-                                    Navigator.pop(context, "Male"),
-                              ),
-                              ListTile(
-                                title: const Text("Female"),
-                                onTap: () =>
-                                    Navigator.pop(context, "Female"),
-                              ),
-                              ListTile(
-                                title: const Text("Other"),
-                                onTap: () =>
-                                    Navigator.pop(context, "Other"),
-                              ),
-                            ],
-                          );
-                        },
-                      );
-
-                      if (result != null) {
-                        setState(() {
-                          gender = result;
-                        });
-                      }
-                    },
-                    child: Container(
-                      height: 52,
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border:
-                            Border.all(color: Colors.grey.shade300),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            gender.isEmpty ? "Select" : gender,
-                            style: TextStyle(
-                                color: gender.isEmpty
-                                    ? Colors.grey
-                                    : Colors.black),
-                          ),
-                          const Spacer(),
-                          const Icon(Icons.keyboard_arrow_down,
-                              color: Colors.deepOrange),
-                        ],
-                      ),
-                    ),
-                  ),
+                  inputValue(gender.isEmpty ? "-" : gender),
                 ],
               ),
             ),
             const Spacer(),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: BoxDecoration(
-                color: AppTheme.backgroundColor,
-                boxShadow: const [
-                  BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 8,
-                      offset: Offset(0, -2))
-                ],
-              ),
-              child: GestureDetector(
-                onTap: updateProfile,
-                child: Container(
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Colors.deepOrange,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      "Update",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -256,14 +133,16 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         padding: const EdgeInsets.only(bottom: 6),
         child: Text(
           text,
-          style:
-              const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
-  Widget inputEditableField(TextEditingController controller) {
+  Widget inputValue(String value) {
     return Container(
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -272,9 +151,9 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         border: Border.all(color: Colors.grey.shade300),
       ),
       alignment: Alignment.centerLeft,
-      child: TextField(
-        controller: controller,
-        decoration: const InputDecoration(border: InputBorder.none),
+      child: Text(
+        value,
+        style: const TextStyle(fontSize: 15),
       ),
     );
   }

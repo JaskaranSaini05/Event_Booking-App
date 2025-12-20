@@ -1,18 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'review_ticket_summary_screen.dart';
 
 class BookTicketScreen extends StatelessWidget {
   final String ticketType;
   final int seats;
 
-  const BookTicketScreen({
+  BookTicketScreen({
     super.key,
     required this.ticketType,
     required this.seats,
   });
 
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+
+  Future<void> saveBooking() async {
+    final user = FirebaseAuth.instance.currentUser!;
+    final bookingRef = FirebaseFirestore.instance.collection('bookings').doc();
+
+    await bookingRef.set({
+      'bookingId': bookingRef.id,
+      'userId': user.uid,
+      'ticketType': ticketType,
+      'seats': seats,
+      'status': 'pending',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    nameController.text = user?.displayName ?? '';
+    emailController.text = user?.email ?? '';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -38,11 +62,11 @@ class BookTicketScreen extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            field("Name", "Esther Howard"),
-            field("Email", "example@gmail.com"),
+            field("Name", nameController),
+            field("Email", emailController),
             dropdown("Gender", ["Male", "Female"]),
-            field("Phone Number", "+1 (208) 555-0112"),
-            dropdown("County", ["United States", "India"]),
+            field("Phone Number", phoneController),
+            dropdown("Country", ["United States", "India"]),
             const Spacer(),
             SizedBox(
               width: double.infinity,
@@ -54,7 +78,8 @@ class BookTicketScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  await saveBooking();
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -77,7 +102,7 @@ class BookTicketScreen extends StatelessWidget {
     );
   }
 
-  Widget field(String label, String hint) {
+  Widget field(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -86,8 +111,8 @@ class BookTicketScreen extends StatelessWidget {
           Text(label),
           const SizedBox(height: 6),
           TextField(
+            controller: controller,
             decoration: InputDecoration(
-              hintText: hint,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

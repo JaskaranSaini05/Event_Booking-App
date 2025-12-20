@@ -20,9 +20,7 @@ class OnboardingScreenFour extends StatelessWidget {
                   onTap: () {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => const SignupPage(),
-                      ),
+                      MaterialPageRoute(builder: (_) => const SignupPage()),
                     );
                   },
                   child: const Text(
@@ -59,7 +57,17 @@ class OnboardingScreenFour extends StatelessWidget {
               child: Column(
                 children: const [
                   Text(
-                    "Engage in a Conversation\nwith Event Organizers",
+                    "Engage in a Conversation with",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Event Organizers",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.deepOrange,
@@ -69,7 +77,7 @@ class OnboardingScreenFour extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
+                    "Chat directly with organizers, receive updates instantly, and stay informed about every event detail",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.grey,
@@ -100,9 +108,7 @@ class OnboardingScreenFour extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const OnboardingScreenThree(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const OnboardingScreenThree()),
                       );
                     },
                     child: Container(
@@ -124,9 +130,7 @@ class OnboardingScreenFour extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const SignupPage(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const SignupPage()),
                       );
                     },
                     child: Container(

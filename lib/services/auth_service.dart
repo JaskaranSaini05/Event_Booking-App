@@ -23,6 +23,7 @@ class AuthService {
   Future<String?> signUp({
     required String name,
     required String email,
+    required String phone,
     required String password,
   }) async {
     try {
@@ -35,6 +36,7 @@ class AuthService {
         'uid': cred.user!.uid,
         'name': name,
         'email': email,
+        'phone': phone,
         'createdAt': DateTime.now(),
       });
 

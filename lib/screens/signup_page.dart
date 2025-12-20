@@ -12,7 +12,9 @@ class SignupPage extends StatefulWidget {
 class _SignupPageState extends State<SignupPage> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _agreeToTerms = true;
 
@@ -20,6 +22,7 @@ class _SignupPageState extends State<SignupPage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -34,6 +37,7 @@ class _SignupPageState extends State<SignupPage> {
 
     if (_nameController.text.isEmpty ||
         _emailController.text.isEmpty ||
+        _phoneController.text.isEmpty ||
         _passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("All fields are required")),
@@ -46,6 +50,7 @@ class _SignupPageState extends State<SignupPage> {
     final error = await auth.signUp(
       name: _nameController.text.trim(),
       email: _emailController.text.trim(),
+      phone: _phoneController.text.trim(),
       password: _passwordController.text.trim(),
     );
 
@@ -72,7 +77,7 @@ class _SignupPageState extends State<SignupPage> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -82,90 +87,40 @@ class _SignupPageState extends State<SignupPage> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
                   ),
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Fill your information below or register\nwith your social account.',
+                  'Fill your information below',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(color: Colors.grey),
                 ),
                 const SizedBox(height: 40),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Name',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
+
+                _label('Name'),
+                _inputField(
                   controller: _nameController,
-                  decoration: InputDecoration(
-                    hintText: 'Esther Howard',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                  ),
+                  hint: 'Esther Howard',
                 ),
+
                 const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Email',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
+                _label('Email'),
+                _inputField(
                   controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    hintText: 'example@gmail.com',
-                    filled: true,
-                    fillColor: Colors.grey[100],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
-                    ),
-                  ),
+                  hint: 'example@gmail.com',
+                  keyboard: TextInputType.emailAddress,
                 ),
+
                 const SizedBox(height: 20),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Password',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
+                _label('Phone Number'),
+                _inputField(
+                  controller: _phoneController,
+                  hint: '9876543210',
+                  keyboard: TextInputType.phone,
                 ),
-                const SizedBox(height: 8),
+
+                const SizedBox(height: 20),
+                _label('Password'),
                 TextField(
                   controller: _passwordController,
                   obscureText: !_isPasswordVisible,
@@ -196,17 +151,18 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
                 Row(
                   children: [
                     Checkbox(
                       value: _agreeToTerms,
+                      activeColor: Colors.deepOrange,
                       onChanged: (value) {
                         setState(() {
                           _agreeToTerms = value ?? false;
                         });
                       },
-                      activeColor: Colors.deepOrange,
                     ),
                     const Text('Agree with '),
                     const Text(
@@ -215,6 +171,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
@@ -238,6 +195,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 40),
               ],
             ),
@@ -247,21 +205,45 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildSocialButton(String iconUrl) {
-    return Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Center(
-        child: Image.network(
-          iconUrl,
-          width: 24,
-          height: 24,
+  Widget _label(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
         ),
       ),
+    );
+  }
+
+  Widget _inputField({
+    required TextEditingController controller,
+    required String hint,
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return Column(
+      children: [
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboard,
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: Colors.grey[100],
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../custom_themes/app_theme.dart';
 import 'explore_screen.dart';
 import 'favorite_screen.dart';
@@ -6,6 +7,7 @@ import 'ticket_screen.dart';
 import 'profile_screen.dart';
 import 'category_screen.dart';
 import 'event_detail_screen.dart';
+import 'notification_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -56,14 +58,22 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Text("Location", style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
                   const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppTheme.backgroundColor,
-                      shape: BoxShape.circle,
-                      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppTheme.backgroundColor,
+                        shape: BoxShape.circle,
+                        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                      ),
+                      child: Icon(Icons.notifications_none, color: AppTheme.textPrimary),
                     ),
-                    child: Icon(Icons.notifications_none, color: AppTheme.textPrimary),
                   )
                 ],
               ),
@@ -126,42 +136,57 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               SizedBox(
                 height: 260,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => EventDetailScreen()),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance.collection('events').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final events = snapshot.data!.docs;
+                    return ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: events.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 15),
+                      itemBuilder: (context, index) {
+                        final data = events[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EventDetailScreen(eventData: data),
+                              ),
+                            );
+                          },
+                          child: eventCard(data['title'], data['price']),
                         );
                       },
-                      child: eventCard("Acoustic Serenade Showcase"),
-                    ),
-                    const SizedBox(width: 15),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => EventDetailScreen()),
-                        );
-                      },
-                      child: eventCard("MusicMania Festival"),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 25),
               sectionHeader("Nearby Events", context),
               const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => EventDetailScreen()),
+              StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('events').limit(1).snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const SizedBox();
+                  }
+                  final data = snapshot.data!.docs.first;
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EventDetailScreen(eventData: data),
+                        ),
+                      );
+                    },
+                    child: eventSmallCard(data['title']),
                   );
                 },
-                child: eventSmallCard("Dance Workshop"),
               ),
             ],
           ),
@@ -212,7 +237,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget eventCard(String title) {
+  Widget eventCard(String title, int price) {
     return Container(
       width: 230,
       padding: const EdgeInsets.all(12),
@@ -240,8 +265,10 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 6),
-          const Text("\$30.00 /Person",
-              style: TextStyle(fontSize: 14, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+          Text(
+            "₹$price /Person",
+            style: const TextStyle(fontSize: 14, color: Colors.deepOrange, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
