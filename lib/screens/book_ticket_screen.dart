@@ -3,19 +3,70 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'review_ticket_summary_screen.dart';
 
-class BookTicketScreen extends StatelessWidget {
+class BookTicketScreen extends StatefulWidget {
   final String ticketType;
   final int seats;
 
-  BookTicketScreen({
+  const BookTicketScreen({
     super.key,
     required this.ticketType,
     required this.seats,
   });
 
+  @override
+  State<BookTicketScreen> createState() => _BookTicketScreenState();
+}
+
+class _BookTicketScreenState extends State<BookTicketScreen> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
+
+  String? selectedGender;
+  String? selectedCountry;
+
+  final List<String> countries = [
+    "Argentina",
+    "Australia",
+    "Austria",
+    "Belgium",
+    "Brazil",
+    "Canada",
+    "China",
+    "Denmark",
+    "Finland",
+    "France",
+    "Germany",
+    "India",
+    "Indonesia",
+    "Ireland",
+    "Italy",
+    "Japan",
+    "Malaysia",
+    "Mexico",
+    "Netherlands",
+    "New Zealand",
+    "Norway",
+    "Pakistan",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Russia",
+    "Saudi Arabia",
+    "Singapore",
+    "South Africa",
+    "South Korea",
+    "Spain",
+    "Sri Lanka",
+    "Sweden",
+    "Switzerland",
+    "Thailand",
+    "Turkey",
+    "United Arab Emirates",
+    "United Kingdom",
+    "United States",
+    "Vietnam"
+  ];
 
   Future<void> saveBooking() async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -24,8 +75,13 @@ class BookTicketScreen extends StatelessWidget {
     await bookingRef.set({
       'bookingId': bookingRef.id,
       'userId': user.uid,
-      'ticketType': ticketType,
-      'seats': seats,
+      'ticketType': widget.ticketType,
+      'seats': widget.seats,
+      'name': nameController.text,
+      'email': emailController.text,
+      'phone': phoneController.text,
+      'gender': selectedGender,
+      'country': selectedCountry,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -38,6 +94,7 @@ class BookTicketScreen extends StatelessWidget {
     emailController.text = user?.email ?? '';
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -48,15 +105,20 @@ class BookTicketScreen extends StatelessWidget {
         ),
         title: const Text(
           "Book Ticket",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 10),
             const Text(
               "Your Information Details",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -64,10 +126,20 @@ class BookTicketScreen extends StatelessWidget {
             const SizedBox(height: 20),
             field("Name", nameController),
             field("Email", emailController),
-            dropdown("Gender", ["Male", "Female"]),
+            dropdown(
+              "Gender",
+              ["Male", "Female"],
+              selectedGender,
+              (val) => setState(() => selectedGender = val),
+            ),
             field("Phone Number", phoneController),
-            dropdown("Country", ["United States", "India"]),
-            const Spacer(),
+            dropdown(
+              "Country",
+              countries,
+              selectedCountry,
+              (val) => setState(() => selectedCountry = val),
+            ),
+            const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               height: 50,
@@ -84,8 +156,8 @@ class BookTicketScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ReviewTicketSummaryScreen(
-                        ticketType: ticketType,
-                        seats: seats,
+                        ticketType: widget.ticketType,
+                        seats: widget.seats,
                       ),
                     ),
                   );
@@ -95,7 +167,7 @@ class BookTicketScreen extends StatelessWidget {
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
@@ -112,18 +184,26 @@ class BookTicketScreen extends StatelessWidget {
           const SizedBox(height: 6),
           TextField(
             controller: controller,
+            keyboardType: label == "Phone Number"
+                ? TextInputType.phone
+                : TextInputType.text,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget dropdown(String label, List<String> items) {
+  Widget dropdown(
+    String label,
+    List<String> items,
+    String? value,
+    ValueChanged<String?> onChanged,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -131,7 +211,8 @@ class BookTicketScreen extends StatelessWidget {
         children: [
           Text(label),
           const SizedBox(height: 6),
-          DropdownButtonFormField(
+          DropdownButtonFormField<String>(
+            value: value,
             items: items
                 .map(
                   (e) => DropdownMenuItem(
@@ -140,7 +221,7 @@ class BookTicketScreen extends StatelessWidget {
                   ),
                 )
                 .toList(),
-            onChanged: (_) {},
+            onChanged: onChanged,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),

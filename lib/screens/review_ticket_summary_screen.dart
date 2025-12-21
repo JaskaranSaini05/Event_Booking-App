@@ -13,7 +13,7 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
     required this.seats,
   });
 
-  Future<Map<String, dynamic>> _getUserData() async {
+  Future<Map<String, dynamic>> getUserData() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final doc =
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
@@ -22,9 +22,10 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double ticketPrice = ticketType == "VIP" ? 50 : 30;
+    final double ticketPrice = ticketType.toLowerCase() == 'vip' ? 50 : 30;
     final double fees = 25;
-    final double total = (ticketPrice * seats) + fees;
+    final double subTotal = ticketPrice * seats;
+    final double total = subTotal + fees;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -37,12 +38,12 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
         ),
         title: const Text(
           "Review Ticket Summary",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600),
         ),
         centerTitle: true,
       ),
       body: FutureBuilder<Map<String, dynamic>>(
-        future: _getUserData(),
+        future: getUserData(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -74,7 +75,7 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: Image.network(
-                          "https://images.unsplash.com/photo-1511379938547-c1f69419868d",
+                          "https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2",
                           height: 70,
                           width: 70,
                           fit: BoxFit.cover,
@@ -84,26 +85,26 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
+                          children: [
                             Text(
-                              "Music",
-                              style: TextStyle(
+                              ticketType.toUpperCase(),
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.deepOrange,
                               ),
                             ),
-                            SizedBox(height: 4),
+                            const SizedBox(height: 4),
                             Text(
-                              "Acoustic Serenade Showcase",
-                              style: TextStyle(
+                              "$ticketType Ticket",
+                              style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 6),
-                            Row(
+                            const SizedBox(height: 6),
+                            const Row(
                               children: [
                                 Icon(Icons.location_on,
                                     size: 14, color: Colors.grey),
@@ -127,8 +128,13 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                 infoRow("Email", email),
                 const SizedBox(height: 20),
                 priceRow(
-                    "$seats $ticketType Tickets", "\$${ticketPrice * seats}"),
-                priceRow("Fees", "\$25.00"),
+                  "$seats $ticketType Ticket${seats > 1 ? 's' : ''}",
+                  "\$${subTotal.toStringAsFixed(2)}",
+                ),
+                priceRow(
+                  "Fees",
+                  "\$${fees.toStringAsFixed(2)}",
+                ),
                 const Divider(height: 30),
                 priceRow(
                   "Total",
@@ -140,8 +146,10 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
-                    Text("Paypal",
-                        style: TextStyle(fontSize: 14, color: Colors.grey)),
+                    Text(
+                      "Paypal",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
                     Text(
                       "Change",
                       style: TextStyle(

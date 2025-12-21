@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'onboarding_screen_three.dart';
 import 'signup_page.dart';
+import 'gender_selection_screen.dart';
 
 class OnboardingScreenFour extends StatelessWidget {
   const OnboardingScreenFour({super.key});
@@ -35,19 +36,20 @@ class OnboardingScreenFour extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Expanded(
-              flex: 4,
-              child: Container(
-                alignment: Alignment.center,
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20),
+            Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.48,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
-                child: const Icon(
-                  Icons.image,
-                  size: 120,
-                  color: Colors.grey,
+              ),
+              child: Center(
+                child: Image.asset(
+                  'assets/images/onboarding_screen_4.png',
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -60,7 +62,7 @@ class OnboardingScreenFour extends StatelessWidget {
                     "Engage in a Conversation with",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.deepOrange,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -108,7 +110,9 @@ class OnboardingScreenFour extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const OnboardingScreenThree()),
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreenThree(),
+                        ),
                       );
                     },
                     child: Container(
@@ -130,7 +134,9 @@ class OnboardingScreenFour extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const SignupPage()),
+                        MaterialPageRoute(
+                          builder: (_) => const GenderSelectionScreen(),
+                        ),
                       );
                     },
                     child: Container(

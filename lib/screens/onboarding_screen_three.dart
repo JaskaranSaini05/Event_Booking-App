@@ -39,10 +39,9 @@ class OnboardingScreenThree extends StatelessWidget {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.image,
-                  size: 120,
-                  color: Colors.grey,
+                child: Image.asset(
+                  'assets/images/onboarding_map_screen.jpg',
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -88,9 +87,9 @@ class OnboardingScreenThree extends StatelessWidget {
               children: [
                 indicator(false),
                 const SizedBox(width: 8),
-                indicator(false),
-                const SizedBox(width: 8),
                 indicator(true),
+                const SizedBox(width: 8),
+                indicator(false),
               ],
             ),
             const SizedBox(height: 30),
@@ -103,7 +102,9 @@ class OnboardingScreenThree extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const OnboardingScreenTwo()),
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreenTwo(),
+                        ),
                       );
                     },
                     child: Container(
@@ -125,7 +126,9 @@ class OnboardingScreenThree extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const OnboardingScreenFour()),
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreenFour(),
+                        ),
                       );
                     },
                     child: Container(

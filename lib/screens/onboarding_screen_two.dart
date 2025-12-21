@@ -45,10 +45,9 @@ class OnboardingScreenTwo extends StatelessWidget {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Icon(
-                  Icons.image,
-                  size: 120,
-                  color: Colors.grey,
+                child: Image.asset(
+                  'assets/images/onboarding_screen_2.jpg',
+                  fit: BoxFit.contain,
                 ),
               ),
             ),
@@ -109,7 +108,9 @@ class OnboardingScreenTwo extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const OnboardingScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreen(),
+                        ),
                       );
                     },
                     child: Container(
@@ -131,7 +132,9 @@ class OnboardingScreenTwo extends StatelessWidget {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const OnboardingScreenThree()),
+                        MaterialPageRoute(
+                          builder: (_) => const OnboardingScreenThree(),
+                        ),
                       );
                     },
                     child: Container(

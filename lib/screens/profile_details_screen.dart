@@ -104,7 +104,17 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       const SizedBox(width: 40),
                     ],
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 30),
+                  CircleAvatar(
+                    radius: 42,
+                    backgroundColor: Colors.grey.shade300,
+                    child: const Icon(
+                      Icons.person,
+                      size: 42,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 30),
                   inputLabel("Name"),
                   inputValue(name),
                   const SizedBox(height: 16),

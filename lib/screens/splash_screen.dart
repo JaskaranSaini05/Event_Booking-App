@@ -35,10 +35,11 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                Icons.confirmation_number_outlined,
-                size: 50,
-                color: AppTheme.colorAccent,
+              child: Image.asset(
+                'assets/images/logo.jpg',
+                width: 60,
+                height: 60,
+                fit: BoxFit.contain,
               ),
             ),
             const SizedBox(height: 32),
