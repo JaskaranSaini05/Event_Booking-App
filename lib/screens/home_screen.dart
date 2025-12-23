@@ -125,7 +125,7 @@ class HomeScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  categoryIcon(Icons.sports_esports, "Gaming"),
+                  categoryIcon(Icons.music_note, "Music"),
                   categoryIcon(Icons.palette, "Arts"),
                   categoryIcon(Icons.work_outline, "Business"),
                   categoryIcon(Icons.checkroom, "Fashion"),
@@ -135,7 +135,7 @@ class HomeScreen extends StatelessWidget {
               sectionHeader("Upcoming Events", context),
               const SizedBox(height: 12),
               SizedBox(
-                height: 260,
+                height: 270,
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('events').snapshots(),
                   builder: (context, snapshot) {
@@ -148,17 +148,21 @@ class HomeScreen extends StatelessWidget {
                       itemCount: events.length,
                       separatorBuilder: (_, __) => const SizedBox(width: 15),
                       itemBuilder: (context, index) {
-                        final data = events[index];
+                        final data = events[index].data() as Map<String, dynamic>;
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => EventDetailScreen(eventData: data),
+                                builder: (_) => EventDetailScreen(eventData: events[index]),
                               ),
                             );
                           },
-                          child: eventCard(data['title'], data['price']),
+                          child: eventCard(
+                            data['title'] ?? '',
+                            data['category'] ?? '',
+                            (data['price'] as num?)?.toInt() ?? 0,
+                          ),
                         );
                       },
                     );
@@ -171,20 +175,20 @@ class HomeScreen extends StatelessWidget {
               StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection('events').limit(1).snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) {
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const SizedBox();
                   }
-                  final data = snapshot.data!.docs.first;
+                  final data = snapshot.data!.docs.first.data() as Map<String, dynamic>;
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => EventDetailScreen(eventData: data),
+                          builder: (_) => EventDetailScreen(eventData: snapshot.data!.docs.first),
                         ),
                       );
                     },
-                    child: eventSmallCard(data['title']),
+                    child: eventSmallCard(data['title'] ?? '', data['category'] ?? ''),
                   );
                 },
               ),
@@ -237,7 +241,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget eventCard(String title, int price) {
+  Widget eventCard(String title, String category, int price) {
     return Container(
       width: 230,
       padding: const EdgeInsets.all(12),
@@ -254,16 +258,10 @@ class HomeScreen extends StatelessWidget {
             decoration: BoxDecoration(color: AppTheme.lightGrey, borderRadius: BorderRadius.circular(14)),
             child: const Center(child: Icon(Icons.image, size: 40, color: Colors.white)),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
+          Text(category, style: const TextStyle(color: Colors.deepOrange, fontSize: 12, fontWeight: FontWeight.w600)),
+          const SizedBox(height: 4),
           Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-          const SizedBox(height: 6),
-          Row(
-            children: const [
-              Icon(Icons.location_on, size: 16, color: Colors.deepOrange),
-              SizedBox(width: 4),
-              Text("New York, USA", style: TextStyle(fontSize: 13)),
-            ],
-          ),
           const SizedBox(height: 6),
           Text(
             "₹$price /Person",
@@ -274,7 +272,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget eventSmallCard(String title) {
+  Widget eventSmallCard(String title, String category) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -291,7 +289,14 @@ class HomeScreen extends StatelessWidget {
             child: const Center(child: Icon(Icons.image, color: Colors.white, size: 30)),
           ),
           const SizedBox(width: 15),
-          Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(category, style: const TextStyle(color: Colors.deepOrange, fontSize: 12)),
+              const SizedBox(height: 4),
+              Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+            ],
+          ),
         ],
       ),
     );

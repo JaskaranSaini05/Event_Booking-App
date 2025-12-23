@@ -18,6 +18,7 @@ dependencies:
   cloud_firestore: ^5.4.0
   firebase_storage: ^12.1.0
 
+  google_maps_flutter: ^2.6.0
   url_launcher: ^6.2.5
 
 dev_dependencies:
