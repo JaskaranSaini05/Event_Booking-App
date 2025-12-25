@@ -48,7 +48,7 @@ class OnboardingScreenFour extends StatelessWidget {
               ),
               child: Center(
                 child: Image.asset(
-                  'assets/images/onboarding_screen_4.png',
+                  'assets/images/onboarding_screen_4.jpg',
                   fit: BoxFit.contain,
                 ),
               ),
@@ -62,7 +62,7 @@ class OnboardingScreenFour extends StatelessWidget {
                     "Engage in a Conversation with",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.deepOrange,
+                      color: Colors.black,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),

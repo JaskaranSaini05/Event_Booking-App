@@ -156,8 +156,10 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ReviewTicketSummaryScreen(
-                        ticketType: widget.ticketType,
-                        seats: widget.seats,
+                        ticketData: {
+                          'ticketType': widget.ticketType,
+                          'seats': widget.seats,
+                        },
                       ),
                     ),
                   );

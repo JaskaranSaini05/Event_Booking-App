@@ -4,13 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'payment_method_screen.dart';
 
 class ReviewTicketSummaryScreen extends StatelessWidget {
-  final String ticketType;
-  final int seats;
+  final Map<String, dynamic> ticketData;
 
   const ReviewTicketSummaryScreen({
     super.key,
-    required this.ticketType,
-    required this.seats,
+    required this.ticketData,
   });
 
   Future<Map<String, dynamic>> getUserData() async {
@@ -22,6 +20,9 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String ticketType = ticketData['ticketType'];
+    final int seats = ticketData['seats'];
+
     final double ticketPrice = ticketType.toLowerCase() == 'vip' ? 50 : 30;
     final double fees = 25;
     final double subTotal = ticketPrice * seats;
