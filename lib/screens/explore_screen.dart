@@ -1,7 +1,8 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({Key? key}) : super(key: key);
@@ -11,9 +12,10 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  GoogleMapController? mapController;
+  final MapController mapController = MapController();
+  final TextEditingController searchController = TextEditingController();
 
-  final LatLng userLocation = const LatLng(30.9010, 75.8573);
+  final LatLng userLocation = LatLng(30.9010, 75.8573);
 
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
     const p = 0.017453292519943295;
@@ -26,159 +28,106 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return 12742 * asin(sqrt(a));
   }
 
-  Set<Marker> buildMarkers(List<QueryDocumentSnapshot> docs) {
+  List<Marker> buildMarkers(List<QueryDocumentSnapshot> docs) {
     return docs.map((doc) {
       final data = doc.data() as Map<String, dynamic>;
-      final lat = (data['latitude'] as num?)?.toDouble() ?? 0.0;
-      final lng = (data['longitude'] as num?)?.toDouble() ?? 0.0;
+      final lat = (data['latitude'] as num).toDouble();
+      final lng = (data['longitude'] as num).toDouble();
 
       return Marker(
-        markerId: MarkerId(doc.id),
-        position: LatLng(lat, lng),
-        infoWindow: InfoWindow(
-          title: data['title'] ?? '',
-          snippet: data['description'] ?? '',
+        point: LatLng(lat, lng),
+        width: 46,
+        height: 46,
+        child: GestureDetector(
+          onTap: () {
+            mapController.move(LatLng(lat, lng), 15);
+          },
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.deepOrange,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.location_on,
+              color: Colors.white,
+              size: 28,
+            ),
+          ),
         ),
       );
-    }).toSet();
+    }).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('events').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Stack(
+        children: [
+          StreamBuilder<QuerySnapshot>(
+            stream:
+                FirebaseFirestore.instance.collection('events').snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          if (snapshot.hasError) {
-            return const Center(
-              child: Text(
-                'Something went wrong',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
+              final markers = buildMarkers(snapshot.data!.docs);
 
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                'No events found',
-                style: TextStyle(fontSize: 16),
-              ),
-            );
-          }
-
-          final docs = snapshot.data!.docs;
-          final markers = buildMarkers(docs);
-
-          return Column(
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.45,
-                child: GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: userLocation,
-                    zoom: 13,
-                  ),
-                  markers: markers,
-                  onMapCreated: (controller) {
-                    mapController = controller;
-                  },
+              return FlutterMap(
+                mapController: mapController,
+                options: MapOptions(
+                  initialCenter: userLocation,
+                  initialZoom: 13,
                 ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: docs.length,
-                  itemBuilder: (context, index) {
-                    final data =
-                        docs[index].data() as Map<String, dynamic>;
-
-                    final lat =
-                        (data['latitude'] as num?)?.toDouble() ?? 0.0;
-                    final lng =
-                        (data['longitude'] as num?)?.toDouble() ?? 0.0;
-
-                    final distance = calculateDistance(
-                      userLocation.latitude,
-                      userLocation.longitude,
-                      lat,
-                      lng,
-                    );
-
-                    final price = (data['price'] as num?)?.toInt() ?? 0;
-
-                    return GestureDetector(
-                      onTap: () {
-                        mapController?.animateCamera(
-                          CameraUpdate.newLatLng(LatLng(lat, lng)),
-                        );
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            )
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  data['title'] ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "${distance.toStringAsFixed(1)} km",
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              data['description'] ?? '',
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              price == 0
-                                  ? "Free Event"
-                                  : "₹$price / person",
-                              style: const TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        'https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png',
+                    subdomains: const ['a', 'b', 'c'],
+                    userAgentPackageName:
+                        'com.jaskaran.event_booking_app',
+                    maxZoom: 18,
+                  ),
+                  MarkerLayer(markers: markers),
+                ],
+              );
+            },
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Container(
+                height: 52,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 10,
+                    )
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.search, color: Colors.grey),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: searchController,
+                        decoration: const InputDecoration(
+                          hintText: 'Search events',
+                          border: InputBorder.none,
                         ),
                       ),
-                    );
-                  },
+                    ),
+                  ],
                 ),
               ),
-            ],
-          );
-        },
+            ),
+          ),
+        ],
       ),
     );
   }
