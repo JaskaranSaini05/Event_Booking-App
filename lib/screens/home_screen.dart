@@ -135,7 +135,7 @@ class HomeScreen extends StatelessWidget {
               sectionHeader("Upcoming Events", context),
               const SizedBox(height: 12),
               SizedBox(
-                height: 270,
+                height: 300,
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('events').snapshots(),
                   builder: (context, snapshot) {
@@ -161,6 +161,8 @@ class HomeScreen extends StatelessWidget {
                           child: eventCard(
                             data['title'] ?? '',
                             data['category'] ?? '',
+                            data['location'] ?? '',
+                            data['date'] ?? '',
                             (data['price'] as num?)?.toInt() ?? 0,
                           ),
                         );
@@ -188,7 +190,12 @@ class HomeScreen extends StatelessWidget {
                         ),
                       );
                     },
-                    child: eventSmallCard(data['title'] ?? '', data['category'] ?? ''),
+                    child: eventSmallCard(
+                      data['title'] ?? '',
+                      data['category'] ?? '',
+                      data['location'] ?? '',
+                      data['date'] ?? '',
+                    ),
                   );
                 },
               ),
@@ -219,7 +226,7 @@ class HomeScreen extends StatelessWidget {
         Text(text, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
         GestureDetector(
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const CategoryScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CategoryScreen()));
           },
           child: const Text("See all", style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.w600)),
         ),
@@ -241,7 +248,13 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget eventCard(String title, String category, int price) {
+  Widget eventCard(
+    String title,
+    String category,
+    String location,
+    String date,
+    int price,
+  ) {
     return Container(
       width: 230,
       padding: const EdgeInsets.all(12),
@@ -262,6 +275,16 @@ class HomeScreen extends StatelessWidget {
           Text(category, style: const TextStyle(color: Colors.deepOrange, fontSize: 12, fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              const Icon(Icons.location_on, size: 14, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(location, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            ],
+          ),
+          const SizedBox(height: 2),
+          Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const SizedBox(height: 6),
           Text(
             "₹$price /Person",
@@ -272,7 +295,12 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget eventSmallCard(String title, String category) {
+  Widget eventSmallCard(
+    String title,
+    String category,
+    String location,
+    String date,
+  ) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -295,6 +323,9 @@ class HomeScreen extends StatelessWidget {
               Text(category, style: const TextStyle(color: Colors.deepOrange, fontSize: 12)),
               const SizedBox(height: 4),
               Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+              const SizedBox(height: 2),
+              Text(location, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(date, style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
         ],

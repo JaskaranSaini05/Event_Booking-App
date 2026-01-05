@@ -22,79 +22,55 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
 
-  String? selectedGender;
-  String? selectedCountry;
+  String gender = '';
+  String country = '';
 
-  final List<String> countries = [
-    "Argentina",
-    "Australia",
-    "Austria",
-    "Belgium",
-    "Brazil",
-    "Canada",
-    "China",
-    "Denmark",
-    "Finland",
-    "France",
-    "Germany",
-    "India",
-    "Indonesia",
-    "Ireland",
-    "Italy",
-    "Japan",
-    "Malaysia",
-    "Mexico",
-    "Netherlands",
-    "New Zealand",
-    "Norway",
-    "Pakistan",
-    "Philippines",
-    "Poland",
-    "Portugal",
-    "Russia",
-    "Saudi Arabia",
-    "Singapore",
-    "South Africa",
-    "South Korea",
-    "Spain",
-    "Sri Lanka",
-    "Sweden",
-    "Switzerland",
-    "Thailand",
-    "Turkey",
-    "United Arab Emirates",
-    "United Kingdom",
-    "United States",
-    "Vietnam"
-  ];
+  Future<void> loadUserData() async {
+    final user = FirebaseAuth.instance.currentUser!;
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    final data = doc.data() ?? {};
+
+    setState(() {
+      nameController.text = data['name'] ?? '';
+      emailController.text = data['email'] ?? '';
+      phoneController.text = data['phone'] ?? '';
+      gender = data['gender'] ?? '';
+      country = data['country'] ?? '';
+    });
+  }
 
   Future<void> saveBooking() async {
     final user = FirebaseAuth.instance.currentUser!;
-    final bookingRef = FirebaseFirestore.instance.collection('bookings').doc();
+    final ref = FirebaseFirestore.instance.collection('bookings').doc();
 
-    await bookingRef.set({
-      'bookingId': bookingRef.id,
+    await ref.set({
+      'bookingId': ref.id,
       'userId': user.uid,
       'ticketType': widget.ticketType,
       'seats': widget.seats,
       'name': nameController.text,
       'email': emailController.text,
       'phone': phoneController.text,
-      'gender': selectedGender,
-      'country': selectedCountry,
+      'gender': gender,
+      'country': country,
       'status': 'pending',
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    nameController.text = user?.displayName ?? '';
-    emailController.text = user?.email ?? '';
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -110,15 +86,10 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-        ),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 10),
             const Text(
               "Your Information Details",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -126,19 +97,9 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
             const SizedBox(height: 20),
             field("Name", nameController),
             field("Email", emailController),
-            dropdown(
-              "Gender",
-              ["Male", "Female"],
-              selectedGender,
-              (val) => setState(() => selectedGender = val),
-            ),
+            readonlyField("Gender", gender),
             field("Phone Number", phoneController),
-            dropdown(
-              "Country",
-              countries,
-              selectedCountry,
-              (val) => setState(() => selectedCountry = val),
-            ),
+            readonlyField("Country", country),
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
@@ -186,10 +147,10 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
           const SizedBox(height: 6),
           TextField(
             controller: controller,
-            keyboardType: label == "Phone Number"
-                ? TextInputType.phone
-                : TextInputType.text,
+            enabled: false,
             decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -200,12 +161,7 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
     );
   }
 
-  Widget dropdown(
-    String label,
-    List<String> items,
-    String? value,
-    ValueChanged<String?> onChanged,
-  ) {
+  Widget readonlyField(String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -213,22 +169,15 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
         children: [
           Text(label),
           const SizedBox(height: 6),
-          DropdownButtonFormField<String>(
-            value: value,
-            items: items
-                .map(
-                  (e) => DropdownMenuItem(
-                    value: e,
-                    child: Text(e),
-                  ),
-                )
-                .toList(),
-            onChanged: onChanged,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey),
             ),
+            child: Text(value),
           ),
         ],
       ),

@@ -13,20 +13,23 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
 
   Future<Map<String, dynamic>> getUserData() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
-    final doc =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get();
     return doc.data() ?? {};
   }
 
   @override
   Widget build(BuildContext context) {
-    final String ticketType = ticketData['ticketType'];
-    final int seats = ticketData['seats'];
+    final String eventTitle = ticketData['eventTitle'] ?? '';
+    final String ticketType = ticketData['ticketType'] ?? '';
+    final int seats = ticketData['seats'] ?? 0;
 
-    final double ticketPrice = ticketType.toLowerCase() == 'vip' ? 50 : 30;
-    final double fees = 25;
-    final double subTotal = ticketPrice * seats;
-    final double total = subTotal + fees;
+    final int ticketPrice = 1000;
+    final int fees = 0;
+    final int subTotal = ticketPrice * seats;
+    final int total = subTotal + fees;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -51,9 +54,9 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
           }
 
           final user = snapshot.data!;
-          final name = user['name'] ?? '';
-          final phone = user['phone'] ?? '';
-          final email = user['email'] ?? '';
+          final String name = user['name'] ?? '';
+          final String phone = user['phone'] ?? '';
+          final String email = user['email'] ?? '';
 
           return Padding(
             padding: const EdgeInsets.all(16),
@@ -96,7 +99,7 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              "$ticketType Ticket",
+                              eventTitle,
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -129,17 +132,17 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                 infoRow("Email", email),
                 const SizedBox(height: 20),
                 priceRow(
-                  "$seats $ticketType Ticket${seats > 1 ? 's' : ''}",
-                  "\$${subTotal.toStringAsFixed(2)}",
+                  "$seats Ticket${seats > 1 ? 's' : ''}",
+                  "₹$subTotal",
                 ),
                 priceRow(
                   "Fees",
-                  "\$${fees.toStringAsFixed(2)}",
+                  "₹$fees",
                 ),
                 const Divider(height: 30),
                 priceRow(
                   "Total",
-                  "\$${total.toStringAsFixed(2)}",
+                  "₹$total",
                   bold: true,
                   highlight: true,
                 ),
