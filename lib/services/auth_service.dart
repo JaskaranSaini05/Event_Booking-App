@@ -1,9 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/user_model.dart';
 
 class AuthService {
-  final _auth = FirebaseAuth.instance;
-  final _db = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<String?> signIn({
     required String email,
@@ -33,10 +34,11 @@ class AuthService {
       );
 
       await _db.collection('users').doc(cred.user!.uid).set({
-        'uid': cred.user!.uid,
         'name': name,
         'email': email,
         'phone': phone,
+        'gender': '',
+        'age': 0,
         'createdAt': DateTime.now(),
       });
 
@@ -44,6 +46,16 @@ class AuthService {
     } on FirebaseAuthException catch (e) {
       return e.message;
     }
+  }
+
+  Future<UserModel?> getCurrentUserModel() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    final doc = await _db.collection('users').doc(user.uid).get();
+    if (!doc.exists) return null;
+
+    return UserModel.fromFirestore(doc.id, doc.data()!);
   }
 
   Future<void> logout() async {

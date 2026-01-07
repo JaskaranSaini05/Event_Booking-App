@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/booking_model.dart';
 import 'review_ticket_summary_screen.dart';
 
 class BookTicketScreen extends StatefulWidget {
   final String ticketType;
   final int seats;
+  final int price;
+  final String eventId;
 
   const BookTicketScreen({
     super.key,
     required this.ticketType,
     required this.seats,
+    required this.price,
+    required this.eventId,
   });
 
   @override
@@ -23,7 +28,12 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
   final TextEditingController phoneController = TextEditingController();
 
   String gender = '';
-  String country = '';
+
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
 
   Future<void> loadUserData() async {
     final user = FirebaseAuth.instance.currentUser!;
@@ -39,7 +49,6 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
       emailController.text = data['email'] ?? '';
       phoneController.text = data['phone'] ?? '';
       gender = data['gender'] ?? '';
-      country = data['country'] ?? '';
     });
   }
 
@@ -47,25 +56,23 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
     final user = FirebaseAuth.instance.currentUser!;
     final ref = FirebaseFirestore.instance.collection('bookings').doc();
 
-    await ref.set({
-      'bookingId': ref.id,
-      'userId': user.uid,
-      'ticketType': widget.ticketType,
-      'seats': widget.seats,
-      'name': nameController.text,
-      'email': emailController.text,
-      'phone': phoneController.text,
-      'gender': gender,
-      'country': country,
-      'status': 'pending',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-  }
+    final booking = BookingModel(
+      bookingId: ref.id,
+      userId: user.uid,
+      eventId: widget.eventId,
+      ticketType: widget.ticketType,
+      seats: widget.seats,
+      price: widget.price,
+      totalAmount: widget.price * widget.seats,
+      name: nameController.text,
+      email: emailController.text,
+      phone: phoneController.text,
+      gender: gender,
+      status: 'pending',
+      createdAt: Timestamp.now(),
+    );
 
-  @override
-  void initState() {
-    super.initState();
-    loadUserData();
+    await ref.set(booking.toMap());
   }
 
   @override
@@ -75,18 +82,18 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Book Ticket",
-          style: TextStyle(fontWeight: FontWeight.w600),
+          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black),
         ),
-        centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -95,15 +102,18 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            field("Name", nameController),
-            field("Email", emailController),
-            readonlyField("Gender", gender),
-            field("Phone Number", phoneController),
-            readonlyField("Country", country),
-            const SizedBox(height: 30),
+            inputField("Name", nameController),
+            inputField("Email", emailController),
+            inputField(
+              "Gender",
+              TextEditingController(text: gender),
+              enabled: false,
+            ),
+            inputField("Phone Number", phoneController),
+            const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
-              height: 50,
+              height: 52,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
@@ -117,9 +127,13 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => ReviewTicketSummaryScreen(
+                        eventId: widget.eventId,
                         ticketData: {
                           'ticketType': widget.ticketType,
                           'seats': widget.seats,
+                          'price': widget.price,
+                          'totalAmount':
+                              widget.price * widget.seats,
                         },
                       ),
                     ),
@@ -137,47 +151,41 @@ class _BookTicketScreenState extends State<BookTicketScreen> {
     );
   }
 
-  Widget field(String label, TextEditingController controller) {
+  Widget inputField(
+    String label,
+    TextEditingController controller, {
+    bool enabled = true,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           const SizedBox(height: 6),
           TextField(
             controller: controller,
-            enabled: false,
+            enabled: enabled,
             decoration: InputDecoration(
+              hintText: label,
+              hintStyle: TextStyle(color: Colors.grey.shade600),
               filled: true,
               fillColor: Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget readonlyField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label),
-          const SizedBox(height: 6),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey),
-            ),
-            child: Text(value),
           ),
         ],
       ),

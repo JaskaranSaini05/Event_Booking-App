@@ -45,24 +45,57 @@ class _TicketScreenState extends State<TicketScreen> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
                     return const Center(
-                        child:
-                            CircularProgressIndicator(color: Colors.deepOrange));
+                      child: CircularProgressIndicator(
+                        color: Colors.deepOrange,
+                      ),
+                    );
                   }
 
-                  final docs = snapshot.data!.docs;
+                  final bookings = snapshot.data!.docs;
 
-                  if (docs.isEmpty) {
+                  if (bookings.isEmpty) {
                     return emptyState();
                   }
 
                   return ListView.builder(
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    itemCount: docs.length,
+                    itemCount: bookings.length,
                     itemBuilder: (context, index) {
-                      final data =
-                          docs[index].data() as Map<String, dynamic>;
+                      final bookingData =
+                          bookings[index].data() as Map<String, dynamic>?;
 
-                      return ticketCard(context, data);
+                      if (bookingData == null ||
+                          !bookingData.containsKey('eventId')) {
+                        return const SizedBox();
+                      }
+
+                      final eventId = bookingData['eventId'];
+
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('events')
+                            .doc(eventId)
+                            .get(),
+                        builder: (context, eventSnap) {
+                          if (!eventSnap.hasData ||
+                              !eventSnap.data!.exists) {
+                            return const SizedBox();
+                          }
+
+                          final eventData =
+                              eventSnap.data!.data() as Map<String, dynamic>?;
+
+                          if (eventData == null) {
+                            return const SizedBox();
+                          }
+
+                          return ticketCard(
+                            context,
+                            eventData,
+                            bookingData,
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -82,8 +115,9 @@ class _TicketScreenState extends State<TicketScreen> {
           GestureDetector(
             onTap: () {
               Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()));
+                context,
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
             },
             child: Container(
               padding: const EdgeInsets.all(8),
@@ -92,8 +126,11 @@ class _TicketScreenState extends State<TicketScreen> {
                 border:
                     Border.all(color: Colors.grey.shade300, width: 1.5),
               ),
-              child: const Icon(Icons.arrow_back_ios_new,
-                  size: 18, color: Colors.black87),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                size: 18,
+                color: Colors.black87,
+              ),
             ),
           ),
           const Expanded(
@@ -101,9 +138,9 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Text(
                 "Ticket",
                 style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -128,9 +165,7 @@ class _TicketScreenState extends State<TicketScreen> {
 
   Widget tabItem(String text, int index) {
     return GestureDetector(
-      onTap: () {
-        setState(() => selectedTab = index);
-      },
+      onTap: () => setState(() => selectedTab = index),
       child: Column(
         children: [
           Text(
@@ -159,7 +194,8 @@ class _TicketScreenState extends State<TicketScreen> {
     );
   }
 
-  Widget ticketCard(BuildContext context, Map<String, dynamic> data) {
+  Widget ticketCard(BuildContext context,
+      Map<String, dynamic> event, Map<String, dynamic> booking) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -185,8 +221,9 @@ class _TicketScreenState extends State<TicketScreen> {
                   borderRadius: BorderRadius.circular(16),
                   image: DecorationImage(
                     image: NetworkImage(
-                        data['imageUrl'] ??
-                            'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800'),
+                      event['imageUrl'] ??
+                          'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
+                    ),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -196,36 +233,42 @@ class _TicketScreenState extends State<TicketScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    badge(data['category'] ?? 'Event'),
+                    badge(event['category'] ?? ''),
                     const SizedBox(height: 8),
                     Text(
-                      data['title'] ?? '',
+                      event['title'] ?? '',
                       style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 16, color: Colors.deepOrange),
+                        const Icon(
+                          Icons.location_on,
+                          size: 16,
+                          color: Colors.deepOrange,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            data['location'] ?? '',
-                            style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade600),
+                            event['location'] ?? '',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      "₹${data['price']} /person",
+                      "₹${booking['price']} /person",
                       style: const TextStyle(
                         color: Colors.deepOrange,
                         fontWeight: FontWeight.bold,
@@ -248,7 +291,7 @@ class _TicketScreenState extends State<TicketScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) =>
-                                  LeaveReviewScreen(eventData: data),
+                                  LeaveReviewScreen(eventData: event),
                             ),
                           );
                         }
@@ -264,8 +307,9 @@ class _TicketScreenState extends State<TicketScreen> {
                       child: Text(
                         "Leave Review",
                         style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.deepOrange),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.deepOrange,
+                        ),
                       ),
                     ),
                   ),
@@ -279,7 +323,11 @@ class _TicketScreenState extends State<TicketScreen> {
                       context,
                       MaterialPageRoute(
                         builder: (_) =>
-                            ReviewTicketSummaryScreen(ticketData: data),
+                            ReviewTicketSummaryScreen(
+                           eventId: booking['eventId'],
+                           ticketData: booking,
+)
+
                       ),
                     );
                   },
@@ -293,8 +341,9 @@ class _TicketScreenState extends State<TicketScreen> {
                       child: Text(
                         "E-Ticket",
                         style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600),
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
@@ -317,9 +366,10 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Text(
         text,
         style: const TextStyle(
-            color: Colors.deepOrange,
-            fontSize: 11,
-            fontWeight: FontWeight.w600),
+          color: Colors.deepOrange,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }
@@ -329,12 +379,16 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.confirmation_number_outlined,
-              size: 80, color: Colors.grey.shade300),
+          Icon(
+            Icons.confirmation_number_outlined,
+            size: 80,
+            color: Colors.grey.shade300,
+          ),
           const SizedBox(height: 16),
-          Text("No tickets found",
-              style:
-                  TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+          Text(
+            "No tickets found",
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+          ),
         ],
       ),
     );
@@ -348,33 +402,37 @@ class _TicketScreenState extends State<TicketScreen> {
         borderRadius:
             const BorderRadius.vertical(top: Radius.circular(25)),
         boxShadow: const [
-          BoxShadow(color: Colors.black12, blurRadius: 6)
+          BoxShadow(color: Colors.black12, blurRadius: 6),
         ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          navIcon(Icons.home_outlined, "Home", false,
-              () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const HomeScreen()))),
-          navIcon(Icons.explore_outlined, "Explore", false,
-              () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ExploreScreen()))),
-          navIcon(Icons.favorite_border, "Favorite", false,
-              () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const FavoriteScreen()))),
+          navIcon(Icons.home_outlined, "Home", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          }),
+          navIcon(Icons.explore_outlined, "Explore", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ExploreScreen()),
+            );
+          }),
+          navIcon(Icons.favorite_border, "Favorite", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const FavoriteScreen()),
+            );
+          }),
           navIcon(Icons.confirmation_number_outlined, "Ticket", true, () {}),
-          navIcon(Icons.person_outline, "Profile", false,
-              () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ProfileScreen()))),
+          navIcon(Icons.person_outline, "Profile", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            );
+          }),
         ],
       ),
     );
@@ -387,18 +445,21 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon,
-              color: active ? Colors.deepOrange : Colors.grey.shade600,
-              size: 26),
+          Icon(
+            icon,
+            color: active ? Colors.deepOrange : Colors.grey.shade600,
+            size: 26,
+          ),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-                color:
-                    active ? Colors.deepOrange : Colors.grey.shade600,
-                fontSize: 12,
-                fontWeight:
-                    active ? FontWeight.w600 : FontWeight.normal),
+              color:
+                  active ? Colors.deepOrange : Colors.grey.shade600,
+              fontSize: 12,
+              fontWeight:
+                  active ? FontWeight.w600 : FontWeight.normal,
+            ),
           ),
         ],
       ),

@@ -24,6 +24,19 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
         .set({'gender': selectedGender}, SetOptions(merge: true));
   }
 
+  Widget responsiveWrapper(BuildContext context, Widget child) {
+    final width = MediaQuery.of(context).size.width;
+    if (width > 900) {
+      return Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: child,
+        ),
+      );
+    }
+    return child;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,95 +56,98 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Tell us about yourself!',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'To Enhance Your Experience, Please Share Your Gender',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey),
-            ),
-            const SizedBox(height: 40),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedGender = 'Male';
-                });
-              },
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: selectedGender == 'Male'
-                    ? Colors.deepOrange
-                    : Colors.grey.shade200,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.male, size: 40, color: Colors.white),
-                    SizedBox(height: 6),
-                    Text('Male', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
+      body: responsiveWrapper(
+        context,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Tell us about yourself!',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 30),
-            GestureDetector(
-              onTap: () {
-                setState(() {
-                  selectedGender = 'Female';
-                });
-              },
-              child: CircleAvatar(
-                radius: 60,
-                backgroundColor: selectedGender == 'Female'
-                    ? Colors.deepOrange
-                    : Colors.grey.shade200,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Icon(Icons.female, size: 40, color: Colors.white),
-                    SizedBox(height: 6),
-                    Text('Female', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
+              const SizedBox(height: 8),
+              const Text(
+                'To Enhance Your Experience, Please Share Your Gender',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
               ),
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: selectedGender.isEmpty
-                    ? null
-                    : () async {
-                        await saveGender();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const AgeSelectionScreen(),
-                          ),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
+              const SizedBox(height: 40),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedGender = 'Male';
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: selectedGender == 'Male'
+                      ? Colors.deepOrange
+                      : Colors.grey.shade200,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.male, size: 40, color: Colors.white),
+                      SizedBox(height: 6),
+                      Text('Male', style: TextStyle(color: Colors.white)),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  'Next',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedGender = 'Female';
+                  });
+                },
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: selectedGender == 'Female'
+                      ? Colors.deepOrange
+                      : Colors.grey.shade200,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.female, size: 40, color: Colors.white),
+                      SizedBox(height: 6),
+                      Text('Female', style: TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const Spacer(),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: selectedGender.isEmpty
+                      ? null
+                      : () async {
+                          await saveGender();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const AgeSelectionScreen(),
+                            ),
+                          );
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepOrange,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

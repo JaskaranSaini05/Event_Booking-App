@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:share_plus/share_plus.dart';
 import 'book_ticket_screen.dart';
-import 'explore_screen.dart';
+import 'organizer_profile_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final QueryDocumentSnapshot eventData;
-
   const EventDetailScreen({super.key, required this.eventData});
 
   @override
@@ -14,6 +14,7 @@ class EventDetailScreen extends StatefulWidget {
 
 class _EventDetailScreenState extends State<EventDetailScreen> {
   bool isFavorite = false;
+  bool readMore = false;
 
   @override
   void initState() {
@@ -26,12 +27,10 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
         .collection('favorites')
         .doc(widget.eventData.id)
         .get();
-    setState(() {
-      isFavorite = doc.exists;
-    });
+    setState(() => isFavorite = doc.exists);
   }
 
-  Future<void> toggleFavorite() async {
+  Future<void> toggleFavorite(Map<String, dynamic> data) async {
     final ref = FirebaseFirestore.instance
         .collection('favorites')
         .doc(widget.eventData.id);
@@ -39,12 +38,9 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     if (isFavorite) {
       await ref.delete();
     } else {
-      await ref.set(widget.eventData.data() as Map<String, dynamic>);
+      await ref.set(data);
     }
-
-    setState(() {
-      isFavorite = !isFavorite;
-    });
+    setState(() => isFavorite = !isFavorite);
   }
 
   @override
@@ -55,524 +51,489 @@ class _EventDetailScreenState extends State<EventDetailScreen> {
     final String category = data['category'] ?? '';
     final String location = data['location'] ?? '';
     final String date = data['date'] ?? '';
-    final String description =
-        data['description'] ??
-        'Enjoy a great event with music, people and a lively atmosphere.';
-    final int price = (data['price'] as num?)?.toInt() ?? 0;
+    final String description = data['description'] ?? '';
+    final String organizer = data['organizer'] ?? '';
     final String? imageUrl = data['imageUrl'];
+    final String? organizerId = data['organizerId'];
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Stack(
-                  children: [
-                    Container(
-                      height: 320,
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(40),
-                          bottomRight: Radius.circular(40),
-                        ),
-                        image: DecorationImage(
-                          image: imageUrl != null && imageUrl.isNotEmpty
-                              ? NetworkImage(imageUrl)
-                              : const NetworkImage(
-                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800'),
-                          fit: BoxFit.cover,
-                        ),
+                Container(
+                  height: 280,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        imageUrl ??
+                            'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
                       ),
+                      fit: BoxFit.cover,
                     ),
-                    Container(
-                      height: 320,
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(40),
-                          bottomRight: Radius.circular(40),
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.3),
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.7),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: IconButton(
-                                icon: const Icon(Icons.arrow_back,
-                                    color: Colors.black),
-                                onPressed: () => Navigator.pop(context),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.share,
-                                        color: Colors.black),
-                                    onPressed: () {},
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                  child: IconButton(
-                                    icon: Icon(
-                                      isFavorite
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: toggleFavorite,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(40),
-                            topRight: Radius.circular(40),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade50,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                category,
-                                style: const TextStyle(
-                                  color: Colors.deepOrange,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              title,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on,
-                                    size: 18, color: Colors.deepOrange),
-                                const SizedBox(width: 4),
-                                Text(
-                                  location,
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                const Icon(Icons.calendar_today,
-                                    size: 16, color: Colors.deepOrange),
-                                const SizedBox(width: 4),
-                                Text(
-                                  date,
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      const Text(
-                        'About Event',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                Container(
+                  height: 280,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back, color: Colors.black),
+                            onPressed: () => Navigator.pop(context),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        description,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          height: 1.5,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      const Text(
-                        'Organizer',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
+                        Row(
                           children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.orange.shade400,
-                                    Colors.deepOrange.shade600
-                                  ],
+                            CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: IconButton(
+                                icon: const Icon(Icons.share, color: Colors.black),
+                                onPressed: () {
+                                  Share.share('$title\n$location\n$date');
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: IconButton(
+                                icon: Icon(
+                                  isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: Colors.red,
                                 ),
-                              ),
-                              child: const Icon(Icons.music_note,
-                                  color: Colors.white),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'SonicVibe Events',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16),
-                                  ),
-                                  Text(
-                                    'Organizer Team',
-                                    style: TextStyle(
-                                        color: Colors.grey, fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: IconButton(
-                                icon: const Icon(Icons.phone,
-                                    color: Colors.deepOrange),
-                                onPressed: () {},
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: IconButton(
-                                icon: const Icon(Icons.message,
-                                    color: Colors.deepOrange),
-                                onPressed: () {},
+                                onPressed: () => toggleFavorite(data),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Address',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const ExploreScreen()),
-                              );
-                            },
-                            child: const Text(
-                              'View on Map',
-                              style: TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        location,
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                          height: 1.5,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, -5)),
-                ],
-              ),
-              child: Row(
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Total Price',
-                          style:
-                              TextStyle(color: Colors.grey.shade600)),
-                      const SizedBox(height: 2),
-                      Text(
-                        '₹$price',
-                        style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepOrange),
-                      ),
-                      Text('/person',
-                          style:
-                              TextStyle(color: Colors.grey.shade600)),
-                    ],
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (_) =>
-                              ChooseTicketBottomSheet(basePrice: price),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        'Book Now',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600),
-                      ),
+                  Text(
+                    category,
+                    style: const TextStyle(
+                      color: Colors.deepOrange,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on,
+                          size: 18, color: Colors.deepOrange),
+                      const SizedBox(width: 6),
+                      Text(location,
+                          style: const TextStyle(color: Colors.grey)),
+                      const SizedBox(width: 20),
+                      const Icon(Icons.access_time,
+                          size: 18, color: Colors.deepOrange),
+                      const SizedBox(width: 6),
+                      Text(date,
+                          style: const TextStyle(color: Colors.grey)),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'About Event',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    description,
+                    maxLines: readMore ? null : 5,
+                    overflow:
+                        readMore ? TextOverflow.visible : TextOverflow.ellipsis,
+                    style:
+                        const TextStyle(color: Colors.grey, height: 1.6),
+                  ),
+                  if (description.length > 250)
+                    GestureDetector(
+                      onTap: () => setState(() => readMore = !readMore),
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          readMore ? 'Read less' : 'Read more',
+                          style: const TextStyle(
+                            color: Colors.deepOrange,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Organizer',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 14),
+                  GestureDetector(
+                    onTap: () {
+                      if (organizerId != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OrganizerProfileScreen(
+                                organizerId: organizerId),
+                          ),
+                        );
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 28,
+                          backgroundImage:
+                              NetworkImage('https://i.pravatar.cc/150?img=5'),
+                        ),
+                        const SizedBox(width: 14),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              organizer,
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                            const Text(
+                              'Organize Team',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 100),
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          height: 55,
+          child: ElevatedButton(
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: const RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                builder: (_) => ChooseTicketBottomSheet(
+                  eventId: widget.eventData.id,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepOrange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+            child: const Text(
+              'Book Now',
+              style: TextStyle(fontSize: 16, color: Colors.white),
+            ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
 class ChooseTicketBottomSheet extends StatefulWidget {
-  final int basePrice;
-
-  const ChooseTicketBottomSheet({super.key, required this.basePrice});
+  final String eventId;
+  const ChooseTicketBottomSheet({super.key, required this.eventId});
 
   @override
   State<ChooseTicketBottomSheet> createState() =>
       _ChooseTicketBottomSheetState();
 }
 
-class _ChooseTicketBottomSheetState extends State<ChooseTicketBottomSheet> {
-  String selectedTicket = 'VIP';
-  int seats = 0;
-
-  Widget ticketCard(String type, int price) {
-    final bool selected = selectedTicket == type;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedTicket = type;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-                color:
-                    selected ? Colors.deepOrange : Colors.grey.shade300,
-                width: 2),
-          ),
-          child: Column(
-            children: [
-              Icon(Icons.confirmation_number,
-                  color:
-                      selected ? Colors.deepOrange : Colors.black),
-              const SizedBox(height: 8),
-              Text(type,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text('₹$price /Person',
-                  style: TextStyle(
-                      color: selected
-                          ? Colors.deepOrange
-                          : Colors.black)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+class _ChooseTicketBottomSheetState
+    extends State<ChooseTicketBottomSheet> {
+  String selectedType = '';
+  int selectedPrice = 0;
+  int seats = 1;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height * 0.75,
+      height: MediaQuery.of(context).size.height * 0.65,
+      padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius:
-            BorderRadius.only(topLeft: Radius.circular(24), topRight: Radius.circular(24)),
+            BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 16),
-          const Text('Choose Ticket',
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const Center(
+            child: Text(
+              'Choose Ticket',
               style:
-                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                ticketCard('VIP', widget.basePrice),
-                const SizedBox(width: 16),
-                ticketCard('Economy', widget.basePrice),
-              ],
+                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Number of Seats',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove),
-                      onPressed:
-                          seats > 0 ? () => setState(() => seats--) : null,
-                    ),
-                    Text(seats.toString(),
-                        style: const TextStyle(fontSize: 16)),
-                    IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: () => setState(() => seats++),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-          const Spacer(),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: seats == 0
-                    ? null
-                    : () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BookTicketScreen(
-                              ticketType: selectedTicket,
-                              seats: seats,
+          const SizedBox(height: 20),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('events')
+                  .doc(widget.eventId)
+                  .collection('tickets')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                      child: CircularProgressIndicator());
+                }
+
+                final tickets = snapshot.data!.docs;
+
+                return Row(
+                  children: tickets.map((doc) {
+                    final type = doc['type'];
+                    final price = doc['price'];
+                    final active = selectedType == type;
+
+                    return Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedType = type;
+                            selectedPrice = price;
+                            seats = 1;
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 6),
+                          decoration: BoxDecoration(
+                            color: active ? Colors.deepOrange.withOpacity(0.1) : Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: active
+                                  ? Colors.deepOrange
+                                  : Colors.grey.shade300,
+                              width: active ? 2.5 : 2,
                             ),
+                            boxShadow: active ? [
+                              BoxShadow(
+                                color: Colors.deepOrange.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ] : [],
                           ),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
+                          child: Column(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 20),
+                                child: AnimatedScale(
+                                  scale: active ? 1.1 : 1.0,
+                                  duration: const Duration(milliseconds: 300),
+                                  child: Icon(
+                                    Icons.confirmation_number,
+                                    size: 32,
+                                    color: active
+                                        ? Colors.deepOrange
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                type,
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: active ? Colors.deepOrange : Colors.black,
+                                ),
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 300),
+                                width: double.infinity,
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: active
+                                      ? Colors.deepOrange
+                                      : Colors.grey.shade200,
+                                  borderRadius:
+                                      const BorderRadius.only(
+                                    bottomLeft:
+                                        Radius.circular(16),
+                                    bottomRight:
+                                        Radius.circular(16),
+                                  ),
+                                ),
+                                child: Text(
+                                  '₹$price /Person',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: active
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Number of Seats',
+                style:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              Row(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      onPressed:
+                          seats > 1 ? () => setState(() => seats--) : null,
+                      icon: Icon(
+                        Icons.remove,
+                        color: seats > 1 ? Colors.black : Colors.grey.shade400,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      seats.toString(),
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: IconButton(
+                      onPressed: () => setState(() => seats++),
+                      icon: const Icon(Icons.add, color: Colors.black),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 55,
+            child: ElevatedButton(
+              onPressed: selectedType.isEmpty
+                  ? null
+                  : () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BookTicketScreen(
+                            eventId: widget.eventId,
+                            ticketType: selectedType,
+                            seats: seats,
+                            price: selectedPrice,
+                          ),
+                        ),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                disabledBackgroundColor:
+                    Colors.grey.shade300,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Text(
-                  'Continue',
-                  style:
-                      TextStyle(fontSize: 16, color: Colors.white)),
+                elevation: selectedType.isEmpty ? 0 : 2,
+              ),
+              child: const Text(
+                'Continue',
+                style:
+                    TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),

@@ -18,6 +18,7 @@ class EventBookingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title:'Eventify',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightThemeData,
       home: const SplashScreen(),

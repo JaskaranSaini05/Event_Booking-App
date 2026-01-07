@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  share_plus: ^7.2.1
   cupertino_icons: ^1.0.8
 
   firebase_core: ^3.4.0
@@ -39,3 +40,12 @@ flutter:
     - assets/images/onboarding_map_screen.jpg
     - assets/images/onboarding_screen_2.jpg
     - assets/images/onboarding_screen_4.jpg
+    - assets/icons/google.png
+    - assets/icons/applepay.png
+    - assets/icons/social.png
+    - assets/icons/whatsapp.png
+    - assets/icons/instagram.png
+    - assets/icons/telegram.png
+    - assets/icons/gmail.png
+    - assets/icons/atmcard.png
+    - assets/icons/facebook.png

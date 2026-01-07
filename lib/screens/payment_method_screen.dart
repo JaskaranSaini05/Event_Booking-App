@@ -3,7 +3,12 @@ import 'package:url_launcher/url_launcher.dart';
 import 'add_card_screen.dart';
 
 class PaymentMethodScreen extends StatefulWidget {
-  const PaymentMethodScreen({super.key});
+  final int totalAmount;
+
+  const PaymentMethodScreen({
+    super.key,
+    required this.totalAmount,
+  });
 
   @override
   State<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
@@ -14,13 +19,27 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Future<void> openGooglePay() async {
     final uri = Uri.parse(
-      "upi://pay?pa=merchant@upi&pn=EventApp&am=100&cu=INR&tn=Event Ticket Payment",
+      "upi://pay"
+      "?pa=merchant@upi"
+      "&pn=EventApp"
+      "&am=${widget.totalAmount}"
+      "&cu=INR"
+      "&tn=Event Ticket Payment",
     );
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 
-    await launchUrl(
-      uri,
-      mode: LaunchMode.externalApplication,
-    );
+  void confirmPayment() {
+    if (selected == "google") {
+      openGooglePay();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Payment method selected: $selected"),
+          backgroundColor: Colors.deepOrange,
+        ),
+      );
+    }
   }
 
   @override
@@ -58,18 +77,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
               boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
+                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
               ],
             ),
             child: ListTile(
-              leading: const Icon(Icons.credit_card, color: Colors.deepOrange),
+              leading: Image.asset(
+                'assets/icons/atmcard.png',
+                width: 32,
+                height: 32,
+              ),
               title: const Text("Add Card"),
-              trailing: const Icon(Icons.arrow_forward_ios,
-                  size: 16, color: Colors.deepOrange),
+              trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.deepOrange),
               onTap: () {
                 Navigator.push(
                   context,
@@ -93,25 +111,28 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
               boxShadow: const [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 4,
-                  offset: Offset(0, 2),
-                ),
+                BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
               ],
             ),
             child: Column(
               children: [
                 paymentOption(
-                    title: "Paypal", icon: Icons.paypal, value: "paypal"),
+                  title: "Paypal",
+                  value: "paypal",
+                  image: Image.asset('assets/icons/social.png', width: 30, height: 30),
+                ),
                 divider(),
                 paymentOption(
-                    title: "Apple Pay", icon: Icons.apple, value: "apple"),
+                  title: "Apple Pay",
+                  value: "apple",
+                  image: Image.asset('assets/icons/applepay.png', width: 30, height: 30),
+                ),
                 divider(),
                 paymentOption(
-                    title: "Google Pay",
-                    icon: Icons.account_balance_wallet,
-                    value: "google"),
+                  title: "Google Pay",
+                  value: "google",
+                  image: Image.asset('assets/icons/google.png', width: 30, height: 30),
+                ),
               ],
             ),
           ),
@@ -122,18 +143,17 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               width: double.infinity,
               height: 55,
               child: ElevatedButton(
-                onPressed: selected == "google" ? openGooglePay : null,
+                onPressed: selected.isNotEmpty ? confirmPayment : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepOrange,
-                  disabledBackgroundColor:
-                      Colors.deepOrange.withOpacity(0.5),
+                  disabledBackgroundColor: Colors.deepOrange.withOpacity(0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
                 ),
-                child: const Text(
-                  "Confirm Payment",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                child: Text(
+                  "Confirm Payment ₹${widget.totalAmount}",
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -145,11 +165,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
   Widget paymentOption({
     required String title,
-    required IconData icon,
+    Widget? image,
     required String value,
   }) {
     return ListTile(
-      leading: Icon(icon, size: 28),
+      leading: image,
       title: Text(title),
       trailing: Container(
         width: 22,

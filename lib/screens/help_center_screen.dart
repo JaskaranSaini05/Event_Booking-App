@@ -34,10 +34,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
                   child: Text(
                     "Help Center",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const SizedBox(width: 48),
@@ -53,10 +50,10 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
                   color: Colors.grey.shade100,
                 ),
                 child: Row(
-                  children: [
-                    const Icon(Icons.search, color: Colors.grey),
-                    const SizedBox(width: 8),
-                    const Expanded(
+                  children: const [
+                    Icon(Icons.search, color: Colors.grey),
+                    SizedBox(width: 8),
+                    Expanded(
                       child: TextField(
                         decoration: InputDecoration(
                           border: InputBorder.none,
@@ -69,7 +66,7 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
               ),
             ),
             const SizedBox(height: 16),
-            Container(
+            SizedBox(
               height: 45,
               child: TabBar(
                 controller: tab,
@@ -104,19 +101,19 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
         buildTabChips(),
         const SizedBox(height: 16),
         tile("Is my personal information secure?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
-        tile("Is there share event details with friends?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
-        tile("How do I receive Booking Details?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
+            "Yes, your data is encrypted and safely stored."),
+        tile("Can I share event details with friends?",
+            "You can easily share event details using social apps."),
+        tile("How do I receive booking details?",
+            "Booking details are sent via email and app notifications."),
         tile("How can I edit my profile information?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
-        tile("How Filter Work?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
-        tile("Is Voice call or Video Call Feature there?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
-        tile("How do I access my purchased tickets?",
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
+            "Go to profile section and tap on edit profile."),
+        tile("How does filter work?",
+            "Filters help you find events by category and location."),
+        tile("Is voice or video call available?",
+            "Currently we support chat and email support."),
+        tile("How do I access my tickets?",
+            "Tickets are available in the Ticket section."),
       ],
     );
   }
@@ -125,12 +122,36 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        contactTile(Icons.headset_mic, "Customer Service", "support@email.com"),
-        contactTile(Icons.chat, "WhatsApp", "(480) 555-0103"),
-        contactTile(Icons.public, "Website", "www.example.com"),
-        contactTile(Icons.thumb_up, "Facebook", "@example"),
-        contactTile(Icons.alternate_email, "Twitter", "@example"),
-        contactTile(Icons.camera_alt, "Instagram", "@example"),
+        contactTileAsset(
+          "assets/icons/whatsapp.png",
+          "WhatsApp Support",
+          "+91 98765 43210\n+91 91234 56789",
+        ),
+        contactTileAsset(
+          "assets/icons/gmail.png",
+          "Email Support",
+          "support@example.com",
+        ),
+        contactTileAsset(
+          "assets/icons/facebook.png",
+          "Facebook",
+          "facebook.com/example",
+        ),
+        contactTileAsset(
+          "assets/icons/instagram.png",
+          "Instagram",
+          "@example",
+        ),
+        contactTileAsset(
+          "assets/icons/telegram.png",
+          "Telegram",
+          "t.me/example",
+        ),
+        contactTileAsset(
+          "assets/icons/google.png",
+          "Website",
+          "www.example.com",
+        ),
       ],
     );
   }
@@ -150,9 +171,9 @@ class _HelpCenterScreenState extends State<HelpCenterScreen>
     );
   }
 
-  Widget contactTile(IconData icon, String title, String subtitle) {
+  Widget contactTileAsset(String iconPath, String title, String subtitle) {
     return ExpansionTile(
-      leading: Icon(icon, color: Colors.deepOrange),
+      leading: Image.asset(iconPath, width: 26, height: 26),
       title: Text(title),
       iconColor: Colors.deepOrange,
       collapsedIconColor: Colors.deepOrange,
