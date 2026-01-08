@@ -17,6 +17,7 @@ class _SignupPageState extends State<SignupPage> {
 
   bool _isPasswordVisible = false;
   bool _agreeToTerms = true;
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -45,6 +46,8 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
+    setState(() => _loading = true);
+
     final auth = AuthService();
 
     final error = await auth.signUp(
@@ -66,6 +69,8 @@ class _SignupPageState extends State<SignupPage> {
         SnackBar(content: Text(error)),
       );
     }
+
+    setState(() => _loading = false);
   }
 
   @override
@@ -86,10 +91,7 @@ class _SignupPageState extends State<SignupPage> {
                 children: [
                   const Text(
                     'Create Account',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 6),
                   const Text(
@@ -180,7 +182,7 @@ class _SignupPageState extends State<SignupPage> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: _handleSignup,
+                      onPressed: _loading ? null : _handleSignup,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepOrange,
                         shape: RoundedRectangleBorder(
@@ -188,14 +190,16 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
+                      child: _loading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                              'Sign Up',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                     ),
                   ),
 
@@ -214,10 +218,7 @@ class _SignupPageState extends State<SignupPage> {
       alignment: Alignment.centerLeft,
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-        ),
+        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
       ),
     );
   }

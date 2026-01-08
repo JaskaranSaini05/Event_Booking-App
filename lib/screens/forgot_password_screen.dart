@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../custom_themes/app_theme.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
@@ -7,6 +8,33 @@ class ForgotPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
+
+    Future<void> sendResetLink() async {
+      final email = emailController.text.trim();
+
+      if (email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please enter your email")),
+        );
+        return;
+      }
+
+      try {
+        await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Password reset link sent to your email"),
+          ),
+        );
+
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -61,7 +89,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                onPressed: () {},
+                onPressed: sendResetLink,
                 child: const Text(
                   "Send Reset Link",
                   style: TextStyle(
