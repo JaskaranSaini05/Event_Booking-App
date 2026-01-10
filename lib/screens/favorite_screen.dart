@@ -6,8 +6,32 @@ import 'explore_screen.dart';
 import 'ticket_screen.dart';
 import 'profile_screen.dart';
 
-class FavoriteScreen extends StatelessWidget {
+class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});
+
+  @override
+  State<FavoriteScreen> createState() => _FavoriteScreenState();
+}
+
+class _FavoriteScreenState extends State<FavoriteScreen> {
+  String selectedCategory = 'All';
+
+  final List<String> categories = [
+    'All',
+    'Music',
+    'Art',
+    'Book',
+    'Photography',
+    'Fashion',
+    'Business',
+    'Travel',
+    'Cars',
+    'Food',
+    'Farming',
+    'Workshop',
+    'Dance',
+    'Technology',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -16,69 +40,98 @@ class FavoriteScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.all(8),
-          child: InkWell(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.grey.shade100,
-              ),
-              child: const Icon(Icons.arrow_back, color: Colors.black),
-            ),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: const Text(
-          'Favorites',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
+          'Favourite',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('favorites').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Column(
+        children: [
+          SizedBox(
+            height: 50,
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                final cat = categories[index];
+                final active = selectedCategory == cat;
 
-          final docs = snapshot.data!.docs;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedCategory = cat;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          active ? Colors.deepOrange : Colors.grey.shade100,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: Text(
+                      cat,
+                      style: TextStyle(
+                        color: active ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('favorites')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-          if (docs.isEmpty) {
-            return const Center(
-              child: Text('No favorite events',
-                  style: TextStyle(fontSize: 16)),
-            );
-          }
+                final docs = snapshot.data!.docs.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final cat = (data['category'] ?? '').toString().toLowerCase();
+                  if (selectedCategory == 'All') return true;
+                  return cat == selectedCategory.toLowerCase();
+                }).toList();
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: docs.length,
-            itemBuilder: (context, index) {
-              final doc = docs[index];
-              final data = doc.data() as Map<String, dynamic>;
+                if (docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No favorite events',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  );
+                }
 
-              final String title = data['title'] ?? '';
-              final String location = data['location'] ?? '';
-              final int price = data['price'] ?? 0;
-              final String? imageUrl = data['imageUrl'];
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black12, blurRadius: 6),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    InkWell(
+                    final String title = data['title'] ?? '';
+                    final String location = data['location'] ?? '';
+                    final String category = data['category'] ?? '';
+                    final int price = data['price'] ?? 0;
+                    final String imageUrl = data['imageUrl'] ??
+                        'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14';
+
+                    return GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -88,97 +141,109 @@ class FavoriteScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: imageUrl != null && imageUrl.isNotEmpty
-                            ? Image.network(
+                      child: Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: const [
+                            BoxShadow(color: Colors.black12, blurRadius: 6),
+                          ],
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
                                 imageUrl,
                                 width: 90,
                                 height: 90,
                                 fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: 90,
-                                height: 90,
-                                color: Colors.grey.shade200,
-                                child: const Icon(Icons.image,
-                                    color: Colors.grey),
                               ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  EventDetailScreen(eventData: doc),
                             ),
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 6),
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on,
-                                    size: 14, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Flexible(
-                                  child: Text(
-                                    location,
-                                    maxLines: 1,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.deepOrange.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      category,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.deepOrange,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    title,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Colors.grey),
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.3,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.location_on,
+                                          size: 14, color: Colors.grey),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          location,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 13,
+                                              color: Colors.grey),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    "₹$price / person",
+                                    style: const TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "₹$price / person",
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                            IconButton(
+                              icon: const Icon(Icons.favorite,
                                   color: Colors.deepOrange),
+                              onPressed: () async {
+                                await FirebaseFirestore.instance
+                                    .collection('favorites')
+                                    .doc(doc.id)
+                                    .delete();
+                              },
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.favorite,
-                          color: Colors.deepOrange),
-                      onPressed: () {
-                        showRemoveSheet(
-                          context,
-                          doc.id,
-                          title,
-                          location,
-                          price,
-                          imageUrl,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 2,
@@ -225,122 +290,6 @@ class FavoriteScreen extends StatelessWidget {
               icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
-    );
-  }
-
-  void showRemoveSheet(
-    BuildContext parentContext,
-    String docId,
-    String title,
-    String location,
-    int price,
-    String? imageUrl,
-  ) {
-    showModalBottomSheet(
-      context: parentContext,
-      backgroundColor: Colors.transparent,
-      isDismissible: true,
-      builder: (sheetContext) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24),
-              topRight: Radius.circular(24),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                "Remove from Favorites?",
-                style:
-                    TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: imageUrl != null && imageUrl.isNotEmpty
-                        ? Image.network(
-                            imageUrl,
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            width: 80,
-                            height: 80,
-                            color: Colors.grey.shade200,
-                          ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 4),
-                        Text(location,
-                            style: const TextStyle(
-                                color: Colors.grey, fontSize: 13)),
-                        const SizedBox(height: 6),
-                        Text("₹$price /person",
-                            style: const TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.of(sheetContext).pop();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                      ),
-                      child: const Text("Cancel",
-                          style:
-                              TextStyle(color: Colors.deepOrange)),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        Navigator.of(sheetContext).pop();
-                        await FirebaseFirestore.instance
-                            .collection('favorites')
-                            .doc(docId)
-                            .delete();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepOrange,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                      ),
-                      child: const Text("Yes, Remove",
-                          style:
-                              TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }
