@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import '../models/event_model.dart';
 import 'event_detail_screen.dart';
 import 'home_screen.dart';
 import 'explore_screen.dart';
@@ -32,6 +34,17 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
     'Dance',
     'Technology',
   ];
+
+  String getFormattedDateTime(Map<String, dynamic> data) {
+    if (data['eventTime'] != null) {
+      final dateTime = (data['eventTime'] as Timestamp).toDate();
+      final dateFormat = DateFormat('MMM d');
+      final timeFormat = DateFormat('h:mm a');
+      return '${dateFormat.format(dateTime)} • ${timeFormat.format(dateTime)}';
+    }
+    final date = data['date'] ?? '';
+    return date.isNotEmpty ? date : 'Date TBD';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +111,11 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepOrange,
+                    ),
+                  );
                 }
 
                 final docs = snapshot.data!.docs.where((doc) {
@@ -109,10 +126,34 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                 }).toList();
 
                 if (docs.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No favorite events',
-                      style: TextStyle(fontSize: 16),
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.favorite_border,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          selectedCategory == 'All'
+                              ? 'No favorite events yet'
+                              : 'No $selectedCategory events',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Start adding events to your favorites',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 }
@@ -124,20 +165,18 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                     final doc = docs[index];
                     final data = doc.data() as Map<String, dynamic>;
 
-                    final String title = data['title'] ?? '';
-                    final String location = data['location'] ?? '';
-                    final String category = data['category'] ?? '';
+                    final String title = data['title'] ?? 'Untitled Event';
+                    final String location = data['location'] ?? 'Location TBD';
+                    final String category = data['category'] ?? 'General';
                     final int price = data['price'] ?? 0;
-                    final String imageUrl = data['imageUrl'] ??
-                        'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14';
+                    final String formattedDateTime = getFormattedDateTime(data);
 
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) =>
-                                EventDetailScreen(eventData: doc),
+                            builder: (_) => EventDetailScreen(eventData: doc),
                           ),
                         );
                       },
@@ -147,8 +186,12 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
-                            BoxShadow(color: Colors.black12, blurRadius: 6),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
                         ),
                         child: Row(
@@ -156,11 +199,26 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                              child: Image.network(
-                                imageUrl,
+                              child: Container(
                                 width: 90,
                                 height: 90,
-                                fit: BoxFit.cover,
+                                color: Colors.grey.shade200,
+                                child: Image.network(
+                                  'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
+                                  width: 90,
+                                  height: 90,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey.shade300,
+                                      child: Icon(
+                                        Icons.event,
+                                        size: 40,
+                                        color: Colors.grey.shade500,
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -195,11 +253,36 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                       height: 1.3,
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                  const SizedBox(height: 4),
                                   Row(
                                     children: [
-                                      const Icon(Icons.location_on,
-                                          size: 14, color: Colors.grey),
+                                      const Icon(
+                                        Icons.access_time,
+                                        size: 12,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          formattedDateTime,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.location_on,
+                                        size: 12,
+                                        color: Colors.grey,
+                                      ),
                                       const SizedBox(width: 4),
                                       Expanded(
                                         child: Text(
@@ -207,8 +290,9 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.grey),
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -219,20 +303,43 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
                                     style: const TextStyle(
                                       color: Colors.deepOrange,
                                       fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.favorite,
-                                  color: Colors.deepOrange),
-                              onPressed: () async {
-                                await FirebaseFirestore.instance
-                                    .collection('favorites')
-                                    .doc(doc.id)
-                                    .delete();
-                              },
+                            Column(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.favorite,
+                                    color: Colors.deepOrange,
+                                  ),
+                                  onPressed: () async {
+                                    await FirebaseFirestore.instance
+                                        .collection('favorites')
+                                        .doc(doc.id)
+                                        .delete();
+                                    
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: const Text(
+                                            'Removed from favorites',
+                                          ),
+                                          backgroundColor: Colors.grey.shade800,
+                                          duration: const Duration(seconds: 2),
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -254,25 +361,25 @@ class _FavoriteScreenState extends State<FavoriteScreen> {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
+              MaterialPageRoute(builder: (_) => HomeScreen()),
             );
           }
           if (index == 1) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const ExploreScreen()),
+              MaterialPageRoute(builder: (_) => ExploreScreen()),
             );
           }
           if (index == 3) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const TicketScreen()),
+              MaterialPageRoute(builder: (_) => TicketScreen()),
             );
           }
           if (index == 4) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+              MaterialPageRoute(builder: (_) => ProfileScreen()),
             );
           }
         },

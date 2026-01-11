@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'event_detail_screen.dart';
+import '../models/event_model.dart';
 
 class CategoryEventsScreen extends StatelessWidget {
   final String category;
 
   const CategoryEventsScreen({super.key, required this.category});
+
+  String getFormattedDateTime(EventModel event) {
+    if (event.eventTime != null) {
+      final dateFormat = DateFormat('MMM d, yyyy');
+      final timeFormat = DateFormat('h:mm a');
+      return '${dateFormat.format(event.eventTime!)} • ${timeFormat.format(event.eventTime!)}';
+    }
+    return event.date.isNotEmpty ? event.date : 'Date TBD';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,32 +29,47 @@ class CategoryEventsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
+        centerTitle: true,
         title: Text(
           category.capitalize(),
           style: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.w600),
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
         ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.all(16),
             child: Container(
-              height: 46,
+              height: 50,
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: const TextField(
+              child: TextField(
                 decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.search),
-                  hintText: "Music",
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Colors.deepOrange,
+                  ),
+                  hintText: "Search ${category.capitalize()} events...",
+                  hintStyle: TextStyle(color: Colors.grey.shade500),
                   border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 14),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -51,11 +77,72 @@ class CategoryEventsScreen extends StatelessWidget {
                   .where('category', isEqualTo: category)
                   .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.deepOrange,
+                    ),
+                  );
                 }
 
-                final events = snapshot.data!.docs;
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Something went wrong',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.event_busy,
+                          size: 80,
+                          color: Colors.grey.shade300,
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'No ${category.capitalize()} Events Found',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Check back later for new events',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final docs = snapshot.data!.docs;
+                final events =
+                    docs.map((e) => EventModel.fromFirestore(e)).toList();
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,9 +150,12 @@ class CategoryEventsScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        "${events.length} Results Found",
+                        "${events.length} ${events.length == 1 ? 'Result' : 'Results'} Found",
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -74,56 +164,83 @@ class CategoryEventsScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemCount: events.length,
                         itemBuilder: (context, index) {
-                          final data =
-                              events[index].data() as Map<String, dynamic>;
+                          final event = events[index];
+                          final formattedDateTime = getFormattedDateTime(event);
 
                           return GestureDetector(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) =>
-                                      EventDetailScreen(eventData: events[index]),
+                                  builder: (_) => EventDetailScreen(
+                                    eventData: docs[index],
+                                  ),
                                 ),
                               );
                             },
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 16),
-                              padding: const EdgeInsets.all(10),
+                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
-                                boxShadow: const [
+                                boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black12, blurRadius: 6),
+                                    color: Colors.black.withOpacity(0.08),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
                                 ],
                               ),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Stack(
                                     children: [
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(16),
-                                        child: Image.network(
-                                          data['imageUrl'],
-                                          width: 95,
-                                          height: 95,
-                                          fit: BoxFit.cover,
+                                        child: Container(
+                                          width: 100,
+                                          height: 100,
+                                          color: Colors.grey.shade200,
+                                          child: Image.network(
+                                            'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
+                                            width: 100,
+                                            height: 100,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (_, __, ___) =>
+                                                Container(
+                                              width: 100,
+                                              height: 100,
+                                              color: Colors.grey.shade300,
+                                              child: Icon(
+                                                Icons.event,
+                                                size: 40,
+                                                color: Colors.grey.shade500,
+                                              ),
+                                            ),
+                                          ),
                                         ),
                                       ),
                                       Positioned(
-                                        top: 6,
-                                        right: 6,
+                                        top: 8,
+                                        right: 8,
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             shape: BoxShape.circle,
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                              ),
+                                            ],
                                           ),
                                           child: const Icon(
                                             Icons.favorite_border,
                                             size: 18,
-                                            color: Colors.orange,
+                                            color: Colors.deepOrange,
                                           ),
                                         ),
                                       ),
@@ -137,54 +254,86 @@ class CategoryEventsScreen extends StatelessWidget {
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 4),
+                                            horizontal: 10,
+                                            vertical: 4,
+                                          ),
                                           decoration: BoxDecoration(
-                                            color: Colors.orange.shade50,
+                                            color: Colors.deepOrange.withOpacity(0.15),
                                             borderRadius:
                                                 BorderRadius.circular(20),
                                           ),
                                           child: Text(
-                                            data['category']
-                                                .toString()
-                                                .capitalize(),
+                                            event.category.capitalize(),
                                             style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.orange),
+                                              fontSize: 11,
+                                              color: Colors.deepOrange,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
                                         ),
                                         const SizedBox(height: 8),
                                         Text(
-                                          data['title'],
-                                          maxLines: 1,
+                                          event.title,
+                                          maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w600),
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            height: 1.3,
+                                          ),
                                         ),
                                         const SizedBox(height: 6),
                                         Row(
                                           children: [
-                                            const Icon(Icons.location_on,
-                                                size: 14,
-                                                color: Colors.grey),
+                                            const Icon(
+                                              Icons.access_time,
+                                              size: 13,
+                                              color: Colors.grey,
+                                            ),
                                             const SizedBox(width: 4),
                                             Expanded(
                                               child: Text(
-                                                data['location'],
+                                                formattedDateTime,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.grey),
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(height: 6),
+                                        const SizedBox(height: 4),
+                                        Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on,
+                                              size: 13,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                event.location,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 8),
                                         Text(
-                                          "₹${data['price']} / person",
+                                          "₹${event.price} / person",
                                           style: const TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.orange),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.deepOrange,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -209,6 +358,7 @@ class CategoryEventsScreen extends StatelessWidget {
 
 extension CapExtension on String {
   String capitalize() {
+    if (isEmpty) return this;
     return "${this[0].toUpperCase()}${substring(1)}";
   }
 }

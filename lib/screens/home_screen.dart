@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import '../custom_themes/app_theme.dart';
+import '../models/event_model.dart';
 import 'explore_screen.dart';
 import 'favorite_screen.dart';
 import 'ticket_screen.dart';
@@ -17,6 +19,27 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String getFormattedDateTime(Map<String, dynamic> data) {
+    if (data['eventTime'] != null) {
+      final dateTime = (data['eventTime'] as Timestamp).toDate();
+      final dateFormat = DateFormat('MMM d, yyyy');
+      final timeFormat = DateFormat('h:mm a');
+      return '${dateFormat.format(dateTime)} • ${timeFormat.format(dateTime)}';
+    }
+    final date = data['date'] ?? '';
+    return date.isNotEmpty ? date : 'Date TBD';
+  }
+
+  String getShortDate(Map<String, dynamic> data) {
+    if (data['eventTime'] != null) {
+      final dateTime = (data['eventTime'] as Timestamp).toDate();
+      final dateFormat = DateFormat('MMM d');
+      return dateFormat.format(dateTime);
+    }
+    final date = data['date'] ?? '';
+    return date.isNotEmpty ? date : 'Date TBD';
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -42,16 +65,16 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             navIcon(Icons.home, "Home", true, () {}),
             navIcon(Icons.explore, "Explore", false, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ExploreScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ExploreScreen()));
             }),
             navIcon(Icons.favorite_border, "Favorite", false, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const FavoriteScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => FavoriteScreen()));
             }),
             navIcon(Icons.confirmation_num_outlined, "Ticket", false, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => TicketScreen()));
             }),
             navIcon(Icons.person_outline, "Profile", false, () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen()));
             }),
           ],
         ),
@@ -67,16 +90,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 20),
                   navIconVertical(Icons.home, "Home", true, () {}),
                   navIconVertical(Icons.explore, "Explore", false, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ExploreScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ExploreScreen()));
                   }),
                   navIconVertical(Icons.favorite_border, "Favorite", false, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const FavoriteScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => FavoriteScreen()));
                   }),
                   navIconVertical(Icons.confirmation_num_outlined, "Ticket", false, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const TicketScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => TicketScreen()));
                   }),
                   navIconVertical(Icons.person_outline, "Profile", false, () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileScreen()));
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen()));
                   }),
                 ],
               ),
@@ -180,13 +203,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       height: 300,
                       child: StreamBuilder<QuerySnapshot>(
-                        stream: FirebaseFirestore.instance.collection('events').snapshots(),
+                        stream: FirebaseFirestore.instance
+                            .collection('events')
+                            .orderBy('eventTime', descending: false)
+                            .snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.deepOrange,
+                              ),
+                            );
                           }
                           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                            return const Center(child: Text('No events found'));
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.event_busy,
+                                    size: 48,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No upcoming events',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                           final events = snapshot.data!.docs;
                           return ListView.separated(
@@ -205,10 +254,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 },
                                 child: eventCard(
-                                  data['title'] ?? 'No Title',
+                                  data['title'] ?? 'Untitled Event',
                                   data['category'] ?? 'General',
                                   data['location'] ?? 'Location TBD',
-                                  data['date'] ?? 'Date TBD',
+                                  getShortDate(data),
+                                  data['price'] ?? 0,
                                 ),
                               );
                             },
@@ -220,13 +270,44 @@ class _HomeScreenState extends State<HomeScreen> {
                     sectionHeader("Nearby Events", context),
                     const SizedBox(height: 12),
                     StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance.collection('events').limit(3).snapshots(),
+                      stream: FirebaseFirestore.instance
+                          .collection('events')
+                          .limit(5)
+                          .snapshots(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                          );
                         }
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Center(child: Text('No nearby events'));
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.location_off,
+                                    size: 48,
+                                    color: Colors.grey.shade400,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No nearby events found',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
                         }
                         return Column(
                           children: snapshot.data!.docs.map((doc) {
@@ -243,10 +324,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 },
                                 child: eventSmallCard(
-                                  data['title'] ?? 'No Title',
+                                  data['title'] ?? 'Untitled Event',
                                   data['category'] ?? 'General',
                                   data['location'] ?? 'Location TBD',
-                                  data['date'] ?? 'Date TBD',
+                                  getShortDate(data),
+                                  data['price'] ?? 0,
                                 ),
                               ),
                             );
@@ -333,6 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String category,
     String location,
     String date,
+    int price,
   ) {
     return Container(
       width: 230,
@@ -348,27 +431,44 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             height: 130,
-            decoration: BoxDecoration(color: AppTheme.lightGrey, borderRadius: BorderRadius.circular(14)),
-            child: const Center(child: Icon(Icons.image, size: 40, color: Colors.white)),
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(14),
+              image: const DecorationImage(
+                image: NetworkImage('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(height: 8),
-          Text(
-            category,
-            style: const TextStyle(color: Colors.deepOrange, fontSize: 12, fontWeight: FontWeight.w600),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.deepOrange.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              category,
+              style: const TextStyle(
+                color: Colors.deepOrange,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             title,
             style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.location_on, size: 14, color: Colors.grey),
+              const Icon(Icons.location_on, size: 13, color: Colors.grey),
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
@@ -380,12 +480,29 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 2),
+          const SizedBox(height: 3),
+          Row(
+            children: [
+              const Icon(Icons.access_time, size: 13, color: Colors.grey),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(
+                  date,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           Text(
-            date,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            '₹$price',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepOrange,
+            ),
           ),
         ],
       ),
@@ -397,6 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String category,
     String location,
     String date,
+    int price,
   ) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -409,40 +527,81 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             width: 80,
-            height: 70,
-            decoration: BoxDecoration(color: AppTheme.lightGrey, borderRadius: BorderRadius.circular(12)),
-            child: const Center(child: Icon(Icons.image, color: Colors.white, size: 30)),
+            height: 80,
+            decoration: BoxDecoration(
+              color: AppTheme.lightGrey,
+              borderRadius: BorderRadius.circular(12),
+              image: const DecorationImage(
+                image: NetworkImage('https://images.unsplash.com/photo-1540039155733-5bb30b53aa14'),
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(width: 15),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  category,
-                  style: const TextStyle(color: Colors.deepOrange, fontSize: 12),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.deepOrange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    category,
+                    style: const TextStyle(
+                      color: Colors.deepOrange,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   title,
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  location,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on, size: 12, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        location,
+                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  date,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(Icons.access_time, size: 12, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      date,
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Spacer(),
+                    Text(
+                      '₹$price',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

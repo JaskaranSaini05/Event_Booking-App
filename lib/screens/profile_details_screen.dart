@@ -129,7 +129,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 ],
               ),
             ),
-            const Spacer(),
           ],
         ),
       ),
