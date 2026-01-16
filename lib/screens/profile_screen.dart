@@ -346,7 +346,7 @@ class ProfileScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const Divider(height: 32),
+                        
                         menuTile(
                           Icons.help_outline,
                           "Help Center",
@@ -383,7 +383,7 @@ class ProfileScreen extends StatelessWidget {
                             );
                           },
                         ),
-                        const Divider(height: 32),
+                      
                         menuTile(
                           Icons.logout,
                           "Log Out",

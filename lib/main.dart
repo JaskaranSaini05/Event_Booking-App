@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'custom_themes/app_theme.dart';
 import 'screens/splash_screen.dart';
+import 'screens/main_navigation.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,10 +19,13 @@ class EventBookingApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title:'Eventify',
+      title: 'Eventify',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightThemeData,
       home: const SplashScreen(),
+      routes: {
+        '/home': (context) => const MainNavigation(),
+      },
     );
   }
 }

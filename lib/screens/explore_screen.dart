@@ -12,6 +12,7 @@ import 'ticket_screen.dart';
 import 'profile_screen.dart';
 import 'event_detail_screen.dart';
 
+
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
 
@@ -176,6 +177,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 );
               },
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
                     width: 60,
@@ -193,20 +195,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           spreadRadius: 1,
                         )
                       ],
-                      image: DecorationImage(
-                        image: NetworkImage(
-                          data['imageUrl'] ??
-                              'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800',
-                        ),
+                    ),
+                    child: ClipOval(
+                      child: Image.network(
+                        data['imageUrl'] ??
+                            'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?w=800',
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey.shade300,
+                            child: const Icon(Icons.image, color: Colors.grey),
+                          );
+                        },
                       ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                      horizontal: 6,
+                      vertical: 2,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.deepOrange,
@@ -221,7 +229,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     child: Text(
                       '${distance.toStringAsFixed(1)} Km',
                       style: const TextStyle(
-                        fontSize: 11,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -241,6 +249,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 360;
 
     if (isLoadingLocation) {
       return const Scaffold(
@@ -350,7 +360,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.search, color: Colors.grey),
+                        const Icon(Icons.search, color: Colors.grey, size: 22),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
@@ -456,7 +466,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     right: 0,
                     bottom: 82 + bottomPadding,
                     child: SizedBox(
-                      height: 260,
+                      height: isSmallScreen ? 240 : 250,
                       child: PageView.builder(
                         controller: pageController,
                         itemCount: filteredEvents.length,
@@ -505,6 +515,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               data['date'] ?? 'Date TBD',
                               (data['price'] as num?)?.toDouble() ?? 0.0,
                               distance,
+                              isSmallScreen,
                             ),
                           );
                         },
@@ -517,7 +528,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         },
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
@@ -532,35 +543,38 @@ class _ExploreScreenState extends State<ExploreScreen> {
             )
           ],
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _navIcon(Icons.home_outlined, "Home", false, () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-              );
-            }),
-            _navIcon(Icons.explore, "Explore", true, () {}),
-            _navIcon(Icons.favorite_border, "Favorite", false, () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const FavoriteScreen()),
-              );
-            }),
-            _navIcon(Icons.confirmation_number_outlined, "Ticket", false, () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const TicketScreen()),
-              );
-            }),
-            _navIcon(Icons.person_outline, "Profile", false, () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const ProfileScreen()),
-              );
-            }),
-          ],
+        child: SafeArea(
+          top: false,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _navIcon(Icons.home_outlined, "Home", false, () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                );
+              }),
+              _navIcon(Icons.explore, "Explore", true, () {}),
+              _navIcon(Icons.favorite_border, "Favorite", false, () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const FavoriteScreen()),
+                );
+              }),
+              _navIcon(Icons.confirmation_number_outlined, "Ticket", false, () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const TicketScreen()),
+                );
+              }),
+              _navIcon(Icons.person_outline, "Profile", false, () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );
@@ -576,12 +590,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: active ? Colors.deepOrange : Colors.grey),
+          Icon(icon,
+              color: active ? Colors.deepOrange : Colors.grey, size: 24),
+          const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 11,
               color: active ? Colors.deepOrange : Colors.grey,
+              fontWeight: active ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],
@@ -597,6 +614,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     String dateTime,
     double price,
     double? distance,
+    bool isSmallScreen,
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -620,19 +638,41 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ClipRRect(
                 borderRadius:
                     const BorderRadius.vertical(top: Radius.circular(20)),
-                child: Image.network(
-                  imageUrl,
-                  height: 140,
+                child: SizedBox(
+                  height: isSmallScreen ? 120 : 130,
                   width: double.infinity,
-                  fit: BoxFit.cover,
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.deepOrange,
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: Icon(Icons.image, size: 40, color: Colors.grey),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
               Positioned(
-                top: 10,
-                left: 10,
+                top: 8,
+                left: 8,
                 child: Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
                     borderRadius: BorderRadius.circular(20),
@@ -640,7 +680,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: Text(
                     category,
                     style: const TextStyle(
-                      fontSize: 11,
+                      fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: Colors.deepOrange,
                     ),
@@ -648,11 +688,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ),
               ),
               Positioned(
-                top: 10,
-                right: 10,
+                top: 8,
+                right: 8,
                 child: Container(
-                  width: 32,
-                  height: 32,
+                  width: 30,
+                  height: 30,
                   decoration: BoxDecoration(
                     color: Colors.white.withOpacity(0.95),
                     shape: BoxShape.circle,
@@ -660,199 +700,186 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   child: const Icon(
                     Icons.favorite_border,
                     color: Colors.deepOrange,
-                    size: 18,
+                    size: 16,
                   ),
                 ),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+          Flexible(
+            child: Padding(
+              padding: EdgeInsets.all(isSmallScreen ? 10 : 12),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 13 : 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on,
-                      size: 14,
-                      color: Colors.deepOrange,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        location,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (distance != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.deepOrange.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.navigation,
-                              size: 10,
-                              color: Colors.deepOrange,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${distance.toStringAsFixed(1)} Km',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color: Colors.deepOrange,
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: Text(
-                        dateTime,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.black54,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Text(
-                      '\$${price.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on,
+                        size: 12,
                         color: Colors.deepOrange,
                       ),
-                    ),
-                    const Text(
-                      ' /Person',
-                      style: TextStyle(fontSize: 11, color: Colors.black54),
-                    ),
-                    const Spacer(),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          location,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 10 : 11,
+                            color: Colors.black54,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (distance != null)
                         Container(
-                          width: 24,
-                          height: 24,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 5,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
-                            image: const DecorationImage(
-                              image: NetworkImage(
-                                  'https://i.pravatar.cc/150?img=1'),
-                              fit: BoxFit.cover,
-                            ),
+                            color: Colors.deepOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(-6, 0),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white, width: 2),
-                              image: const DecorationImage(
-                                image: NetworkImage(
-                                    'https://i.pravatar.cc/150?img=2'),
-                                fit: BoxFit.cover,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.navigation,
+                                size: 9,
+                                color: Colors.deepOrange,
                               ),
-                            ),
-                          ),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(-12, 0),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white, width: 2),
-                              image: const DecorationImage(
-                                image: NetworkImage(
-                                    'https://i.pravatar.cc/150?img=3'),
-                                fit: BoxFit.cover,
+                              const SizedBox(width: 2),
+                              Text(
+                                '${distance.toStringAsFixed(1)} Km',
+                                style: const TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.deepOrange,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
-                        Transform.translate(
-                          offset: const Offset(-18, 0),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: Colors.deepOrange,
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                '+',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
+                    ],
+                  ),
+                  const SizedBox(height: 3),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: Colors.deepOrange,
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          dateTime,
+                          style: TextStyle(
+                            fontSize: isSmallScreen ? 10 : 11,
+                            color: Colors.black54,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Text(
+                        '\$${price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontSize: isSmallScreen ? 14 : 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange,
+                        ),
+                      ),
+                      Text(
+                        ' /Person',
+                        style: TextStyle(
+                            fontSize: isSmallScreen ? 9 : 10,
+                            color: Colors.black54),
+                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _avatarCircle('https://i.pravatar.cc/150?img=1', 0),
+                          _avatarCircle('https://i.pravatar.cc/150?img=2', -6),
+                          _avatarCircle('https://i.pravatar.cc/150?img=3', -12),
+                          Transform.translate(
+                            offset: const Offset(-18, 0),
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: Colors.deepOrange,
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: const Center(
+                                child: Text(
+                                  '+',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _avatarCircle(String imageUrl, double offsetX) {
+    return Transform.translate(
+      offset: Offset(offsetX, 0),
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 2),
+        ),
+        child: ClipOval(
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey.shade300,
+                child: const Icon(Icons.person, size: 12, color: Colors.grey),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

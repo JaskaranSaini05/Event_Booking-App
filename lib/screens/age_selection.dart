@@ -14,6 +14,28 @@ class AgeSelectionScreen extends StatefulWidget {
 class _AgeSelectionScreenState extends State<AgeSelectionScreen> {
   int selectedAge = 18;
 
+  @override
+  void initState() {
+    super.initState();
+    loadSavedAge();
+  }
+
+  Future<void> loadSavedAge() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    if (doc.exists && doc.data()?['age'] != null) {
+      setState(() {
+        selectedAge = (doc.data()!['age'] as num).toInt();
+      });
+    }
+  }
+
   Future<void> saveAge() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -21,7 +43,12 @@ class _AgeSelectionScreenState extends State<AgeSelectionScreen> {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
-        .set({'age': selectedAge}, SetOptions(merge: true));
+        .set(
+      {
+        'age': selectedAge,
+      },
+      SetOptions(merge: true),
+    );
   }
 
   Widget responsiveWrapper(BuildContext context, Widget child) {

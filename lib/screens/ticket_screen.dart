@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'event_detail_screen.dart';
+import 'home_screen.dart';
+import 'explore_screen.dart';
+import 'favorite_screen.dart';
+import 'profile_screen.dart';
 
 class TicketScreen extends StatefulWidget {
   const TicketScreen({super.key});
@@ -85,9 +90,7 @@ class _TicketScreenState extends State<TicketScreen> {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: selectedTab == index
-                  ? Colors.deepOrange
-                  : Colors.grey,
+              color: selectedTab == index ? Colors.deepOrange : Colors.grey,
             ),
           ),
           const SizedBox(height: 6),
@@ -134,7 +137,7 @@ class _TicketScreenState extends State<TicketScreen> {
           padding: const EdgeInsets.all(20),
           itemCount: docs.length,
           itemBuilder: (context, index) {
-            return ticketCard(docs[index], false);
+            return ticketCard(docs[index] as QueryDocumentSnapshot, false);
           },
         );
       },
@@ -175,10 +178,8 @@ class _TicketScreenState extends State<TicketScreen> {
                   return const SizedBox();
                 }
 
-                return ticketCard(
-                  snap.data as QueryDocumentSnapshot,
-                  true,
-                );
+                final eventDoc = snap.data!;
+                return ticketCard(eventDoc as QueryDocumentSnapshot, true);
               },
             );
           },
@@ -234,10 +235,10 @@ class _TicketScreenState extends State<TicketScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  categoryBadge(event['category']),
+                  categoryBadge(event['category'] ?? "Event"),
                   const SizedBox(height: 6),
                   Text(
-                    event['title'],
+                    event['title'] ?? "No Title",
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -253,7 +254,7 @@ class _TicketScreenState extends State<TicketScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          event['location'],
+                          event['location'] ?? "Unknown",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -266,7 +267,7 @@ class _TicketScreenState extends State<TicketScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    "₹${event['price']} /person",
+                    "₹${event['price'] ?? 0} /person",
                     style: const TextStyle(
                       color: Colors.deepOrange,
                       fontWeight: FontWeight.bold,
@@ -326,9 +327,10 @@ class _TicketScreenState extends State<TicketScreen> {
     );
   }
 
+  // ✅ UPDATED BOTTOM BAR (WITH NAVIGATION)
   Widget bottomBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
@@ -339,20 +341,66 @@ class _TicketScreenState extends State<TicketScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          navIcon(Icons.home_outlined, false),
-          navIcon(Icons.explore_outlined, false),
-          navIcon(Icons.confirmation_number_outlined, true),
-          navIcon(Icons.person_outline, false),
+          navIcon(Icons.home_outlined, "Home", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          }),
+          navIcon(Icons.explore_outlined, "Explore", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ExploreScreen()),
+            );
+          }),
+          navIcon(Icons.favorite_border, "Favourite", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const FavoriteScreen()),
+            );
+          }),
+          navIcon(Icons.confirmation_number_outlined, "Tickets", true, () {
+            // Already on TicketScreen, so do nothing
+          }),
+          navIcon(Icons.person_outline, "Profile", false, () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget navIcon(IconData icon, bool active) {
-    return Icon(
-      icon,
-      size: 26,
-      color: active ? Colors.deepOrange : Colors.grey.shade600,
+  // ✅ ICON + TITLE WIDGET (WITH onTap)
+  Widget navIcon(
+    IconData icon,
+    String title,
+    bool active,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: active ? Colors.deepOrange : Colors.grey.shade600,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 11,
+              color: active ? Colors.deepOrange : Colors.grey.shade600,
+              fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

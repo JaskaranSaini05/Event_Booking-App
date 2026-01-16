@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import '../models/event_model.dart';
 import 'payment_method_screen.dart';
 
@@ -27,6 +28,13 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
         .doc(eventId)
         .get();
     return EventModel.fromFirestore(doc);
+  }
+
+  String formatDateTime(EventModel event) {
+    if (event.eventTime != null) {
+      return DateFormat('MMM d, yyyy • h:mm a').format(event.eventTime!);
+    }
+    return event.date;
   }
 
   @override
@@ -79,33 +87,66 @@ class ReviewTicketSummaryScreen extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              event.category,
-                              style: const TextStyle(
-                                color: Colors.deepOrange,
-                                fontWeight: FontWeight.w600,
+                            Container(
+                              width: 100,
+                              height: 130,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                image: const DecorationImage(
+                                  image: NetworkImage(
+                                    'https://images.unsplash.com/photo-1540039155733-5bb30b53aa14',
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 6),
-                            Text(
-                              event.title,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    event.category,
+                                    style: const TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    event.title,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    event.organizer,
+                                    style:
+                                        const TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    formatDateTime(event),
+                                    style:
+                                        const TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    event.location,
+                                    style:
+                                        const TextStyle(color: Colors.grey),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              event.organizer,
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "${event.location} • ${event.date}",
-                              style: const TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
