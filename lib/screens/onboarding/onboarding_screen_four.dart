@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'onboarding_screen_three.dart';
-import 'signup_page.dart';
-import 'gender_selection_screen.dart';
+import '../auth/signup_page.dart';
+import '../gender_selection_screen.dart';
 
 class OnboardingScreenFour extends StatelessWidget {
   const OnboardingScreenFour({super.key});

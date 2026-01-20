@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'help_center_screen.dart';
-import 'privacy_policy_screen.dart';
-import 'login_screen.dart';
-import 'home_screen.dart';
-import 'explore_screen.dart';
-import 'favorite_screen.dart';
-import 'ticket_screen.dart';
+import '../help_center_screen.dart';
+import '../privacy_policy_screen.dart';
+import '../auth/login_screen.dart';
+import '../home/home_screen.dart';
+import '../home/explore_screen.dart';
+import '../home/favorite_screen.dart';
+import '../bookings/ticket_screen.dart';
 import 'profile_details_screen.dart';
-import 'invite_friends_screen.dart';
-import 'following_organizers_screen.dart';
+import '../invite_friends_screen.dart';
+import '../following_organizers_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});

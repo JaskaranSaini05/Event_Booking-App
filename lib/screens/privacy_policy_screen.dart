@@ -6,127 +6,123 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 1,
+        elevation: 0.5,
+        centerTitle: true,
         title: const Text(
           "Privacy Policy",
           style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+            fontWeight: FontWeight.w800,
+            color: Colors.black87,
+            fontSize: 18,
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              "Cancellation Policy",
+              "Please read the details carefully.",
               style: TextStyle(
-                color: Colors.deepOrange,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+                fontSize: 13,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "You can cancel your booking at any time before the event starts. "
-              "Refunds will be processed based on the event organizer's rules. "
-              "In case of late cancellations, a partial refund or no refund may apply. "
-              "We aim to ensure a smooth and transparent cancellation experience. "
-              "\n\nCancellation requests must be submitted through the official app. "
-              "Processing time may vary depending on payment method and banking partners.",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                height: 1.5,
-              ),
+            const SizedBox(height: 16),
+
+            _policyCard(
+              title: "Cancellation Policy",
+              text:
+                  "You can cancel your booking before the event starts. Refunds depend on the organizer’s rules.\n\n"
+                  "Late cancellations may result in partial or no refund.\n\n"
+                  "Cancellation requests must be submitted through the app. Processing time may vary depending on your payment method.",
             ),
-            const SizedBox(height: 30),
-            const Text(
-              "Terms & Conditions",
-              style: TextStyle(
-                color: Colors.deepOrange,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+
+            const SizedBox(height: 14),
+
+            _policyCard(
+              title: "Terms & Conditions",
+              text:
+                  "By using this platform, you agree to follow all rules set by event organizers and the app.\n\n"
+                  "Misuse, fraud, or violation of guidelines may lead to account restriction or termination.\n\n"
+                  "We may update these terms anytime to improve service and user safety.",
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "By using our platform, you agree to follow all rules set by event "
-              "organizers and the application. Misuse of the platform, fraudulent "
-              "activity, or violation of our guidelines may result in account restrictions. "
-              "We reserve the right to update these terms at any time for improved service.\n\n"
-              "Your access to certain features may be restricted based on your activity, "
-              "location, or compliance with our policy. Failure to adhere to safety rules "
-              "during events may result in immediate removal without refund.\n\n"
-              "We encourage all users to review updates regularly to stay informed.",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                height: 1.5,
-              ),
+
+            const SizedBox(height: 14),
+
+            _policyCard(
+              title: "Privacy & Data Protection",
+              text:
+                  "We collect only necessary information for bookings, notifications, and user identification.\n\n"
+                  "We do not sell your data to third-party advertisers.\n\n"
+                  "Some details may be shared with event organizers for ticket verification.\n\n"
+                  "You can request data deletion or changes anytime through support.",
             ),
-            const SizedBox(height: 30),
-            const Text(
-              "Privacy & Data Protection",
-              style: TextStyle(
-                color: Colors.deepOrange,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+
+            const SizedBox(height: 14),
+
+            _policyCard(
+              title: "User Responsibilities",
+              text:
+                  "Keep your login details safe and private.\n\n"
+                  "Report unauthorized activity immediately.\n\n"
+                  "Fraud attempts, fake identities, or promo misuse may result in account termination.\n\n"
+                  "Use the platform responsibly to maintain a positive environment for everyone.",
             ),
-            const SizedBox(height: 8),
-            const Text(
-              "We ensure that your personal information is collected, stored, and processed "
-              "securely. Only essential details required for event bookings, notifications, "
-              "and user identification are stored.\n\n"
-              "We do not sell or share your data with third-party advertisers. However, "
-              "certain information may be shared with event organizers to facilitate ticket "
-              "management and entry verification.\n\n"
-              "Your data is encrypted and handled according to international standards of "
-              "privacy protection. You may request data deletion or modification anytime "
-              "through customer support.\n\n"
-              "In case of system updates or security enhancements, temporary service "
-              "interruptions may occur. We always aim to restore services as quickly as possible.",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 40),
-            const Text(
-              "User Responsibilities",
-              style: TextStyle(
-                color: Colors.deepOrange,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              "Users are responsible for maintaining the confidentiality of their login "
-              "credentials. Any suspicious or unauthorized activity must be reported "
-              "immediately.\n\n"
-              "Refund fraud, fake identity use, or attempting to misuse promo codes may "
-              "lead to account termination.\n\n"
-              "We encourage users to use the platform responsibly and maintain a positive "
-              "environment for all event attendees.",
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 50),
+
+            const SizedBox(height: 24),
           ],
         ),
+      ),
+    );
+  }
+
+  // ✅ Clean Card UI for sections
+  static Widget _policyCard({required String title, required String text}) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: Colors.deepOrange,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.black54,
+              height: 1.55,
+            ),
+          ),
+        ],
       ),
     );
   }

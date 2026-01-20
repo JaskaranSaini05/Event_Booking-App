@@ -5,12 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import '../custom_themes/app_theme.dart';
+import '../../custom_themes/app_theme.dart';
 import 'home_screen.dart';
 import 'favorite_screen.dart';
-import 'ticket_screen.dart';
-import 'profile_screen.dart';
-import 'event_detail_screen.dart';
+import '../bookings/ticket_screen.dart';
+import '../profile/profile_screen.dart';
+import '../events/event_detail_screen.dart';
 
 
 class ExploreScreen extends StatefulWidget {

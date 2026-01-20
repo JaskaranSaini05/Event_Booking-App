@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'gender_selection_screen.dart';
-import 'signup_page.dart';
+import 'auth/signup_page.dart';
 
 class AgeSelectionScreen extends StatefulWidget {
   const AgeSelectionScreen({super.key});

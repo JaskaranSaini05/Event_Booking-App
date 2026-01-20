@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
-import '../models/event_model.dart';
-import 'book_ticket_screen.dart';
-import 'organizer_profile_screen.dart';
+import '../../models/event_model.dart';
+import '../bookings/book_ticket_screen.dart';
+import '../profile/organizer_profile_screen.dart';
 
 class EventDetailScreen extends StatefulWidget {
   final QueryDocumentSnapshot eventData;

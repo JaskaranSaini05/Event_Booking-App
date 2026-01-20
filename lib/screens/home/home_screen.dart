@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../custom_themes/app_theme.dart';
-import '../models/event_model.dart';
+import '../../custom_themes/app_theme.dart';
+import '../../models/event_model.dart';
 import 'explore_screen.dart';
 import 'favorite_screen.dart';
-import 'ticket_screen.dart';
-import 'profile_screen.dart';
-import 'category_screen.dart';
-import 'event_detail_screen.dart';
-import 'notification_screen.dart';
+import '../bookings/ticket_screen.dart';
+import '../profile/profile_screen.dart';
+import '../events/category_screen.dart';
+import '../events/event_detail_screen.dart';
+import '../notification_screen.dart';
 import 'search_screen.dart';
 import 'upcoming_events_screen.dart';
 
@@ -540,7 +540,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     return Container(
       width: 220,
-      height: 260,
+  
       decoration: BoxDecoration(
         color: AppTheme.backgroundColor,
         borderRadius: BorderRadius.circular(16),
@@ -548,6 +548,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius:

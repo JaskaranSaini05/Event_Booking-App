@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../models/event_model.dart';
-import 'event_detail_screen.dart';
+import '../../models/event_model.dart';
+import '../events/event_detail_screen.dart';
 import 'home_screen.dart';
 import 'explore_screen.dart';
-import 'ticket_screen.dart';
-import 'profile_screen.dart';
+import '../bookings/ticket_screen.dart';
+import '../profile/profile_screen.dart';
 
 class FavoriteScreen extends StatefulWidget {
   const FavoriteScreen({super.key});

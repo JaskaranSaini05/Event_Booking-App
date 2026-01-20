@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../custom_themes/app_theme.dart';
-import 'event_detail_screen.dart';
+import '../../custom_themes/app_theme.dart';
+import '../events/event_detail_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   final String searchQuery;

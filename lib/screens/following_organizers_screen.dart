@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'home_screen.dart';
-import '../screens/explore_screen.dart';
+import 'home/home_screen.dart';
+import 'home/explore_screen.dart';
 
-import 'favorite_screen.dart';
-import 'ticket_screen.dart';
-import 'profile_screen.dart';
-import 'organizer_profile_screen.dart';
+import 'home/favorite_screen.dart';
+import 'bookings/ticket_screen.dart';
+import 'profile/profile_screen.dart';
+import 'profile/organizer_profile_screen.dart';
 
 class FollowingOrganizersScreen extends StatelessWidget {
   const FollowingOrganizersScreen({super.key});

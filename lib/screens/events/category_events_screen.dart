@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'event_detail_screen.dart';
-import '../models/event_model.dart';
+import '../../models/event_model.dart';
 
 class CategoryEventsScreen extends StatelessWidget {
   final String category;

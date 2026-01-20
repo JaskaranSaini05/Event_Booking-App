@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'onboarding_screen_four.dart';
+import 'onboarding/onboarding_screen_four.dart';
 import 'age_selection.dart';
 
 class GenderSelectionScreen extends StatefulWidget {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../custom_themes/app_theme.dart';
 
-import 'home_screen.dart';
-import 'explore_screen.dart';
-import 'favorite_screen.dart';
-import 'ticket_screen.dart';
-import 'profile_screen.dart';
+import 'home/home_screen.dart';
+import 'home/explore_screen.dart';
+import 'home/favorite_screen.dart';
+import 'bookings/ticket_screen.dart';
+import 'profile/profile_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
